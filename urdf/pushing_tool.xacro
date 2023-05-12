@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+
+<robot name="pushing_tool" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:macro name="cylinder_inertia_def" params="r h mass">
+        <inertia ixx="${mass*(3*r*r+h*h)/12}" ixy="0" ixz="0" iyy="${mass*(3*r*r+h*h)/12}" iyz="0" izz="${mass*r*r/2}"/>
+    </xacro:macro>
+
+    <xacro:macro name="sphere_inertia_def" params="radius mass">
+        <inertia ixx="${2/5*mass*radius*radius}" ixy="0" ixz="0" iyy="${2/5*mass*radius*radius}" iyz="0" izz="${2/5*mass*radius*radius}"/>
+    </xacro:macro>
+
+    <xacro:macro name="contact_parameters" params="name">
+    <gazebo reference="${name}">
+        <collision>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <soft_cfm>0.5</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+6</kp>
+                <kd>1e3</kd>
+                <max_vel>2</max_vel>
+                <min_depth>0.01</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+    </gazebo>
+    </xacro:macro>
+
+    <!-- Define tool -->
+    <xacro:macro name="pushing_tool" params="prefix parent *origin">
+
+    <xacro:if value="${prefix == 'LARM_'}">
+        <xacro:property name="m" value="+1" />
+    </xacro:if>
+
+    <xacro:if value="${prefix == 'RARM_'}">
+        <xacro:property name="m" value="-1" />
+    </xacro:if>
+
+    <link name="${prefix}END_EFFECTOR">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+        <mesh filename="package://chonk_pushing/urdf/meshes/end_effector.stl"/>
+        </geometry>
+        <material name ="Grey"/>
+      </visual>
+      <inertial>
+        <mass value="0.01" />
+        <origin xyz="0 0 0.03" rpy="0 0 0"/>
+        <xacro:nxa_box_inertia_def x="0.02" y="0.02" z="0.02" mass="0.01"/>
+      </inertial>
+    </link>
+<!--    <xacro:contact_parameters name="${prefix}END_EFFECTOR"/>-->
+
+    <!-- end-effector root -->
+    <joint name="${prefix}ARM_eeff" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${prefix}END_EFFECTOR"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+
+    <!-- sliding frame at tip of spherical extension -->
+    <joint name="${prefix}ARM_eeff_finger" type="fixed">
+      <parent link="${prefix}END_EFFECTOR"/>
+      <child link="${prefix}END_EFFECTOR_finger"/>
+      <origin xyz="-0.02 0 0.075" rpy="0 0 0" />
+    </joint>
+    <link name="${prefix}END_EFFECTOR_finger">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+            <sphere radius="0.0125"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.001" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <xacro:sphere_inertia_def radius="0.0125" mass="0.001"/>
+      </inertial>
+    </link>
+<!--    <xacro:contact_parameters name="${prefix}END_EFFECTOR_finger"/>-->
+
+    <!-- grasp frame at centre of flat extension -->
+    <joint name="${prefix}ARM_eeff_grasp" type="fixed">
+      <parent link="${prefix}END_EFFECTOR"/>
+      <child link="${prefix}END_EFFECTOR_grasp"/>
+      <origin xyz="-0.08 0 0.04" rpy="0 ${-M_PI/2} 0" />
+<!--      <origin xyz="-0.055 0 0.04" rpy="0 ${-M_PI/2} 0" />-->
+    </joint>
+    <link name="${prefix}END_EFFECTOR_grasp">
+      <inertial>
+        <mass value="0.05" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <xacro:nxa_box_inertia_def x="0.001" y="0.001" z="0.001" mass="0.05"/>
+      </inertial>
+    </link>
+<!--    <xacro:contact_parameters name="${prefix}END_EFFECTOR_grasp"/>-->
+
+    <!-- offset from grasp frame to the tip of the flat contact (diameter: 9cm) -->
+    <joint name="${prefix}ARM_eeff_grasp_end" type="fixed">
+      <parent link="${prefix}END_EFFECTOR_grasp"/>
+      <child link="${prefix}END_EFFECTOR_grasp_end"/>
+      <origin xyz="0.045 0 0" />
+    </joint>
+    <link name="${prefix}END_EFFECTOR_grasp_end">
+      <collision>
+        <origin rpy="0 0 0" xyz="-0.045 0 -0.0025"/>
+        <geometry>
+            <cylinder length="0.005" radius="0.045"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.05" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <xacro:cylinder_inertia_def r="0.045" h="0.005" mass="0.05"/>
+      </inertial>
+    </link>
+    <xacro:contact_parameters name="${prefix}END_EFFECTOR_grasp_end"/>
+
+    </xacro:macro>
+</robot>

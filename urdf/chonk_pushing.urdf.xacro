@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+
+<robot name="chonk" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find donkey_description)/urdf/donkey.xacro" />
+    <xacro:include filename="$(find nextagea_description)/urdf/robot/nextagea_robot.xacro" />
+    <xacro:include filename="$(find nextage_extensions)/urdf/ati.xacro" />
+    <xacro:include filename="$(find nextage_extensions)/urdf/tool_changer.xacro" />
+<!--    <xacro:include filename="$(find nextage_extensions)/urdf/robotiq_140_gripper.xacro" />-->
+    <xacro:include filename="$(find chonk_pushing)/urdf/pushing_tool.xacro" />
+
+
+    <!-- Robot -->
+    <xacro:nextagea_robot nextagea_gazebo_ros_control="false"/>
+
+    <!-- Base -->
+    <xacro:donkey_base prefix="chonk" donkey_gazebo_ros_control="false">
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+    </xacro:donkey_base>
+
+    <xacro:meccanum_base_mount prefix="chonk" child="WAIST">
+        <origin xyz="0.422 0.0 0.855" rpy="0 0 0"/>
+    </xacro:meccanum_base_mount>
+
+    <!-- F/T sensors -->
+    <xacro:ati_ft_sensor parent="LARM_JOINT5_Link" prefix="LARM_" topic_name="ft_left/raw/data">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:ati_ft_sensor>
+
+    <xacro:ati_ft_sensor parent="RARM_JOINT5_Link" prefix="RARM_" topic_name="ft_right/raw/data">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:ati_ft_sensor>
+
+    <!-- Tool Changers -->
+    <xacro:tool_changer prefix="LARM_" parent="LARM_ft_link">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:tool_changer>
+
+    <xacro:tool_changer prefix="RARM_" parent="RARM_ft_link">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:tool_changer>
+    
+    
+    <!-- pushing tool -->
+    <xacro:pushing_tool prefix="LARM_" parent="LARM_changer_link">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:pushing_tool>
+
+    <xacro:pushing_tool prefix="RARM_" parent="RARM_changer_link">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:pushing_tool>
+
+    <!-- chonk head frame -->
+    <link name="CAMERA_HEAD_Link"/>
+    <joint name="CAMERA_HEAD_Joint" type="fixed">
+      <parent link="CAMERA_HEAD_R_Link"/>
+      <child link="CAMERA_HEAD_Link"/>
+      <origin xyz="0 0.0725 0" rpy="0 0 0" />
+    </joint>
+    <link name="CAMERA_HEAD_HEADING_Link"/>
+    <joint name="CAMERA_HEAD_HEADING_Joint" type="fixed">
+      <parent link="HEAD_JOINT1_Link"/>
+      <child link="CAMERA_HEAD_HEADING_Link"/>
+      <origin xyz="1.2 0 0" rpy="0 0 0" />
+    </joint>
+
+    <!-- teleop frame for reference-->
+    <link name="teleop_ref"/>
+    <joint name="teleop_ref_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="teleop_ref"/>
+      <origin xyz="0.3 0 0" rpy="3.14159 0 0"/>
+    </joint>
+
+    <!-- gaze reference -->
+    <link name="gaze_ref"/>
+    <joint name="gaze_ref_joint" type="fixed">
+      <parent link="RARM_END_EFFECTOR_finger"/>
+      <child link="gaze_ref"/>
+      <origin xyz="0.25 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Grippers -->
+<!--    <xacro:robotiq_140_gripper prefix="LARM_" parent="LARM_changer_link">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:robotiq_140_gripper>-->
+
+<!--    <xacro:robotiq_140_gripper prefix="RARM_" parent="RARM_changer_link">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:robotiq_140_gripper>-->
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+          <robotNamespace>/chonk</robotNamespace>
+        </plugin>
+    </gazebo>
+
+    <!-- Camera -->
+<!--    <xacro:include filename="$(find nextage_extensions)/urdf/intel_realsense.xacro" />
+    <xacro:nx_intel_realsense_mount prefix="intel_realsense"/>-->
+
+<!--    <gazebo>
+      <plugin filename="libhector_gazebo_ros_imu.so" name="gazebo_ros_imu">
+        <bodyName>donkey_base</bodyName>
+        <updateRate>100</updateRate>
+        <serviceName>/chonk/imu_service</serviceName>
+        <topicName>/chonk/imu</topicName>
+        <gaussianNoise>0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+      </plugin>
+    </gazebo>-->
+
+    <gazebo>
+      <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>500</updateRate>
+      <bodyName>donkey_base</bodyName>
+      <topicName>/chonk/base_pose_ground_truth</topicName>
+      <gaussianNoise>0</gaussianNoise>
+       <xyzOffsets>0 0 0</xyzOffsets>
+      <rpyOffsets>0 0 0</rpyOffsets>
+      </plugin>
+    </gazebo>
+
+<!--    <gazebo>
+      <plugin name="chonk_gps" filename="libhector_gazebo_ros_gps.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>100</updateRate>
+        <bodyName>donkey_base</bodyName>
+        <frameId>donkey_base</frameId>
+        <topicName>/chonk/GPS/fix</topicName>
+        <referenceLatitude>0</referenceLatitude>
+        <referenceLongitude>0</referenceLongitude>
+        <velocityTopicName>/chonk/GPS/fix_velocity</velocityTopicName>
+        <drift>0.0 0.0 0.0</drift>
+        <gaussianNoise>0.0 0.0 0.0</gaussianNoise>
+        <velocityDrift>0.00000 0.00000 0.00000</velocityDrift>
+        <velocityGaussianNoise>0.00000 0.00000 0.00000</velocityGaussianNoise>
+        <ignoreTfPrefix>1</ignoreTfPrefix>
+      </plugin>
+    </gazebo>-->
+
+</robot>

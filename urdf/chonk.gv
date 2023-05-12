@@ -1,0 +1,185 @@
+digraph G {
+node [shape=box];
+"base_link" [label="base_link"];
+"donkey_base" [label="donkey_base"];
+"fl_wheel_link" [label="fl_wheel_link"];
+"fl_wheel_link_passive" [label="fl_wheel_link_passive"];
+"fr_wheel_link" [label="fr_wheel_link"];
+"fr_wheel_link_passive" [label="fr_wheel_link_passive"];
+"rl_wheel_link" [label="rl_wheel_link"];
+"rl_wheel_link_passive" [label="rl_wheel_link_passive"];
+"rr_wheel_link" [label="rr_wheel_link"];
+"rr_wheel_link_passive" [label="rr_wheel_link_passive"];
+"WAIST" [label="WAIST"];
+"CHEST_JOINT0_Link" [label="CHEST_JOINT0_Link"];
+"HEAD_JOINT0_Link" [label="HEAD_JOINT0_Link"];
+"HEAD_JOINT1_Link" [label="HEAD_JOINT1_Link"];
+"CAMERA_HEAD_HEADING_Link" [label="CAMERA_HEAD_HEADING_Link"];
+"CAMERA_HEAD_L_Link" [label="CAMERA_HEAD_L_Link"];
+"CAMERA_HEAD_R_Link" [label="CAMERA_HEAD_R_Link"];
+"CAMERA_HEAD_Link" [label="CAMERA_HEAD_Link"];
+"intel_realsense_d435_Mount_Link" [label="intel_realsense_d435_Mount_Link"];
+"intel_realsense_bottom_screw_frame" [label="intel_realsense_bottom_screw_frame"];
+"intel_realsense_link" [label="intel_realsense_link"];
+"intel_realsense_color_frame" [label="intel_realsense_color_frame"];
+"intel_realsense_color_optical_frame" [label="intel_realsense_color_optical_frame"];
+"intel_realsense_depth_frame" [label="intel_realsense_depth_frame"];
+"intel_realsense_depth_optical_frame" [label="intel_realsense_depth_optical_frame"];
+"intel_realsense_infra1_frame" [label="intel_realsense_infra1_frame"];
+"intel_realsense_infra1_optical_frame" [label="intel_realsense_infra1_optical_frame"];
+"intel_realsense_infra2_frame" [label="intel_realsense_infra2_frame"];
+"intel_realsense_infra2_optical_frame" [label="intel_realsense_infra2_optical_frame"];
+"LARM_JOINT0_Link" [label="LARM_JOINT0_Link"];
+"LARM_JOINT1_Link" [label="LARM_JOINT1_Link"];
+"LARM_JOINT2_Link" [label="LARM_JOINT2_Link"];
+"LARM_JOINT3_Link" [label="LARM_JOINT3_Link"];
+"LARM_JOINT4_Link" [label="LARM_JOINT4_Link"];
+"LARM_JOINT5_Link" [label="LARM_JOINT5_Link"];
+"LARM_ft_link_base" [label="LARM_ft_link_base"];
+"LARM_ft_Sensor_Link" [label="LARM_ft_Sensor_Link"];
+"LARM_ft_link" [label="LARM_ft_link"];
+"LARM_changer_link_base" [label="LARM_changer_link_base"];
+"LARM_changer_link" [label="LARM_changer_link"];
+"LARM_END_EFFECTOR" [label="LARM_END_EFFECTOR"];
+"LARM_END_EFFECTOR_finger" [label="LARM_END_EFFECTOR_finger"];
+"LARM_END_EFFECTOR_grasp" [label="LARM_END_EFFECTOR_grasp"];
+"LARM_END_EFFECTOR_grasp_end" [label="LARM_END_EFFECTOR_grasp_end"];
+"RARM_JOINT0_Link" [label="RARM_JOINT0_Link"];
+"RARM_JOINT1_Link" [label="RARM_JOINT1_Link"];
+"RARM_JOINT2_Link" [label="RARM_JOINT2_Link"];
+"RARM_JOINT3_Link" [label="RARM_JOINT3_Link"];
+"RARM_JOINT4_Link" [label="RARM_JOINT4_Link"];
+"RARM_JOINT5_Link" [label="RARM_JOINT5_Link"];
+"RARM_ft_link_base" [label="RARM_ft_link_base"];
+"RARM_ft_Sensor_Link" [label="RARM_ft_Sensor_Link"];
+"RARM_ft_link" [label="RARM_ft_link"];
+"RARM_changer_link_base" [label="RARM_changer_link_base"];
+"RARM_changer_link" [label="RARM_changer_link"];
+"RARM_END_EFFECTOR" [label="RARM_END_EFFECTOR"];
+"RARM_END_EFFECTOR_finger" [label="RARM_END_EFFECTOR_finger"];
+"gaze_ref" [label="gaze_ref"];
+"RARM_END_EFFECTOR_grasp" [label="RARM_END_EFFECTOR_grasp"];
+"RARM_END_EFFECTOR_grasp_end" [label="RARM_END_EFFECTOR_grasp_end"];
+"teleop_ref" [label="teleop_ref"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"base_link" -> "donkey_base_link_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"donkey_base_link_joint" -> "donkey_base"
+"donkey_base" -> "fl_wheel_joint" [label="xyz: 0.36 0.25 0.095 \nrpy: 0 -0 0"]
+"fl_wheel_joint" -> "fl_wheel_link"
+"fl_wheel_link" -> "fl_wheel_link_passive_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"fl_wheel_link_passive_joint" -> "fl_wheel_link_passive"
+"donkey_base" -> "fr_wheel_joint" [label="xyz: 0.36 -0.25 0.095 \nrpy: 0 -0 0"]
+"fr_wheel_joint" -> "fr_wheel_link"
+"fr_wheel_link" -> "fr_wheel_link_passive_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"fr_wheel_link_passive_joint" -> "fr_wheel_link_passive"
+"donkey_base" -> "rl_wheel_joint" [label="xyz: -0.36 0.25 0.095 \nrpy: 0 -0 0"]
+"rl_wheel_joint" -> "rl_wheel_link"
+"rl_wheel_link" -> "rl_wheel_link_passive_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"rl_wheel_link_passive_joint" -> "rl_wheel_link_passive"
+"donkey_base" -> "rr_wheel_joint" [label="xyz: -0.36 -0.25 0.095 \nrpy: 0 -0 0"]
+"rr_wheel_joint" -> "rr_wheel_link"
+"rr_wheel_link" -> "rr_wheel_link_passive_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"rr_wheel_link_passive_joint" -> "rr_wheel_link_passive"
+"base_link" -> "donkey_base_mount_joint" [label="xyz: 0.422 0 0.855 \nrpy: 0 -0 0"]
+"donkey_base_mount_joint" -> "WAIST"
+"WAIST" -> "CHEST_JOINT0" [label="xyz: 0 0 0.267 \nrpy: 0 -0 0"]
+"CHEST_JOINT0" -> "CHEST_JOINT0_Link"
+"CHEST_JOINT0_Link" -> "HEAD_JOINT0" [label="xyz: 0 0 0.302 \nrpy: 0 -0 0"]
+"HEAD_JOINT0" -> "HEAD_JOINT0_Link"
+"HEAD_JOINT0_Link" -> "HEAD_JOINT1" [label="xyz: 0 0 0.08 \nrpy: 0 -0 0"]
+"HEAD_JOINT1" -> "HEAD_JOINT1_Link"
+"HEAD_JOINT1_Link" -> "CAMERA_HEAD_HEADING_Joint" [label="xyz: 1.2 0 0 \nrpy: 0 -0 0"]
+"CAMERA_HEAD_HEADING_Joint" -> "CAMERA_HEAD_HEADING_Link"
+"HEAD_JOINT1_Link" -> "CAMERA_HEAD_L" [label="xyz: 0.0175 0.0725 0.105 \nrpy: 0 0.25 0"]
+"CAMERA_HEAD_L" -> "CAMERA_HEAD_L_Link"
+"HEAD_JOINT1_Link" -> "CAMERA_HEAD_R" [label="xyz: 0.0175 -0.0725 0.105 \nrpy: 0 0.25 0"]
+"CAMERA_HEAD_R" -> "CAMERA_HEAD_R_Link"
+"CAMERA_HEAD_R_Link" -> "CAMERA_HEAD_Joint" [label="xyz: 0 0.0725 0 \nrpy: 0 -0 0"]
+"CAMERA_HEAD_Joint" -> "CAMERA_HEAD_Link"
+"HEAD_JOINT1_Link" -> "intel_realsense_d435_mount_joint" [label="xyz: 0 0 0.144832 \nrpy: 0 0.249021 0"]
+"intel_realsense_d435_mount_joint" -> "intel_realsense_d435_Mount_Link"
+"intel_realsense_d435_Mount_Link" -> "intel_realsense_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"intel_realsense_joint" -> "intel_realsense_bottom_screw_frame"
+"intel_realsense_bottom_screw_frame" -> "intel_realsense_link_joint" [label="xyz: 0.0106 0.0175 0.0125 \nrpy: 0 -0 0"]
+"intel_realsense_link_joint" -> "intel_realsense_link"
+"intel_realsense_link" -> "intel_realsense_color_joint" [label="xyz: 0 0.015 0 \nrpy: 0 -0 0"]
+"intel_realsense_color_joint" -> "intel_realsense_color_frame"
+"intel_realsense_color_frame" -> "intel_realsense_color_optical_joint" [label="xyz: 0 0 0 \nrpy: -1.5708 -0 -1.5708"]
+"intel_realsense_color_optical_joint" -> "intel_realsense_color_optical_frame"
+"intel_realsense_link" -> "intel_realsense_depth_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"intel_realsense_depth_joint" -> "intel_realsense_depth_frame"
+"intel_realsense_depth_frame" -> "intel_realsense_depth_optical_joint" [label="xyz: 0 0 0 \nrpy: -1.5708 -0 -1.5708"]
+"intel_realsense_depth_optical_joint" -> "intel_realsense_depth_optical_frame"
+"intel_realsense_link" -> "intel_realsense_infra1_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"intel_realsense_infra1_joint" -> "intel_realsense_infra1_frame"
+"intel_realsense_infra1_frame" -> "intel_realsense_infra1_optical_joint" [label="xyz: 0 0 0 \nrpy: -1.5708 -0 -1.5708"]
+"intel_realsense_infra1_optical_joint" -> "intel_realsense_infra1_optical_frame"
+"intel_realsense_link" -> "intel_realsense_infra2_joint" [label="xyz: 0 -0.05 0 \nrpy: 0 -0 0"]
+"intel_realsense_infra2_joint" -> "intel_realsense_infra2_frame"
+"intel_realsense_infra2_frame" -> "intel_realsense_infra2_optical_joint" [label="xyz: 0 0 0 \nrpy: -1.5708 -0 -1.5708"]
+"intel_realsense_infra2_optical_joint" -> "intel_realsense_infra2_optical_frame"
+"CHEST_JOINT0_Link" -> "LARM_JOINT0" [label="xyz: 0.04 0.135 0.1015 \nrpy: 0 -0 0"]
+"LARM_JOINT0" -> "LARM_JOINT0_Link"
+"LARM_JOINT0_Link" -> "LARM_JOINT1" [label="xyz: 0 0 0.066 \nrpy: 0 -0 0"]
+"LARM_JOINT1" -> "LARM_JOINT1_Link"
+"LARM_JOINT1_Link" -> "LARM_JOINT2" [label="xyz: 0 0.095 -0.25 \nrpy: 0 -0 0"]
+"LARM_JOINT2" -> "LARM_JOINT2_Link"
+"LARM_JOINT2_Link" -> "LARM_JOINT3" [label="xyz: 0.1805 0 -0.03 \nrpy: 0 -0 0"]
+"LARM_JOINT3" -> "LARM_JOINT3_Link"
+"LARM_JOINT3_Link" -> "LARM_JOINT4" [label="xyz: 0.1495 0 0 \nrpy: 0 -0 0"]
+"LARM_JOINT4" -> "LARM_JOINT4_Link"
+"LARM_JOINT4_Link" -> "LARM_JOINT5" [label="xyz: 0 0 -0.1335 \nrpy: 0 -0 0"]
+"LARM_JOINT5" -> "LARM_JOINT5_Link"
+"LARM_JOINT5_Link" -> "LARM_ft_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LARM_ft_joint" -> "LARM_ft_link_base"
+"LARM_ft_link_base" -> "LARM_ft_sensor_joint" [label="xyz: 0 0 -0.0333 \nrpy: 3.14159 -0 0"]
+"LARM_ft_sensor_joint" -> "LARM_ft_Sensor_Link"
+"LARM_ft_Sensor_Link" -> "LARM_ft_sensor_offset_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LARM_ft_sensor_offset_joint" -> "LARM_ft_link"
+"LARM_ft_link" -> "LARM_changer_robot_side_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LARM_changer_robot_side_joint" -> "LARM_changer_link_base"
+"LARM_changer_link_base" -> "LARM_changer_tool_side_joint" [label="xyz: 0 0 0.039 \nrpy: 0 -0 0"]
+"LARM_changer_tool_side_joint" -> "LARM_changer_link"
+"LARM_changer_link" -> "LARM_ARM_eeff" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LARM_ARM_eeff" -> "LARM_END_EFFECTOR"
+"LARM_END_EFFECTOR" -> "LARM_ARM_eeff_finger" [label="xyz: -0.02 0 0.075 \nrpy: 0 -0 0"]
+"LARM_ARM_eeff_finger" -> "LARM_END_EFFECTOR_finger"
+"LARM_END_EFFECTOR" -> "LARM_ARM_eeff_grasp" [label="xyz: -0.08 0 0.04 \nrpy: 0 -1.5708 0"]
+"LARM_ARM_eeff_grasp" -> "LARM_END_EFFECTOR_grasp"
+"LARM_END_EFFECTOR_grasp" -> "LARM_ARM_eeff_grasp_end" [label="xyz: 0.045 0 0 \nrpy: 0 -0 0"]
+"LARM_ARM_eeff_grasp_end" -> "LARM_END_EFFECTOR_grasp_end"
+"CHEST_JOINT0_Link" -> "RARM_JOINT0" [label="xyz: 0.04 -0.135 0.1015 \nrpy: 0 -0 0"]
+"RARM_JOINT0" -> "RARM_JOINT0_Link"
+"RARM_JOINT0_Link" -> "RARM_JOINT1" [label="xyz: 0 0 0.066 \nrpy: 0 -0 0"]
+"RARM_JOINT1" -> "RARM_JOINT1_Link"
+"RARM_JOINT1_Link" -> "RARM_JOINT2" [label="xyz: 0 -0.095 -0.25 \nrpy: 0 -0 0"]
+"RARM_JOINT2" -> "RARM_JOINT2_Link"
+"RARM_JOINT2_Link" -> "RARM_JOINT3" [label="xyz: 0.1805 0 -0.03 \nrpy: 0 -0 0"]
+"RARM_JOINT3" -> "RARM_JOINT3_Link"
+"RARM_JOINT3_Link" -> "RARM_JOINT4" [label="xyz: 0.1495 0 0 \nrpy: 0 -0 0"]
+"RARM_JOINT4" -> "RARM_JOINT4_Link"
+"RARM_JOINT4_Link" -> "RARM_JOINT5" [label="xyz: 0 0 -0.1335 \nrpy: 0 -0 0"]
+"RARM_JOINT5" -> "RARM_JOINT5_Link"
+"RARM_JOINT5_Link" -> "RARM_ft_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RARM_ft_joint" -> "RARM_ft_link_base"
+"RARM_ft_link_base" -> "RARM_ft_sensor_joint" [label="xyz: 0 0 -0.0333 \nrpy: 3.14159 -0 0"]
+"RARM_ft_sensor_joint" -> "RARM_ft_Sensor_Link"
+"RARM_ft_Sensor_Link" -> "RARM_ft_sensor_offset_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RARM_ft_sensor_offset_joint" -> "RARM_ft_link"
+"RARM_ft_link" -> "RARM_changer_robot_side_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RARM_changer_robot_side_joint" -> "RARM_changer_link_base"
+"RARM_changer_link_base" -> "RARM_changer_tool_side_joint" [label="xyz: 0 0 0.039 \nrpy: 0 -0 0"]
+"RARM_changer_tool_side_joint" -> "RARM_changer_link"
+"RARM_changer_link" -> "RARM_ARM_eeff" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RARM_ARM_eeff" -> "RARM_END_EFFECTOR"
+"RARM_END_EFFECTOR" -> "RARM_ARM_eeff_finger" [label="xyz: -0.02 0 0.075 \nrpy: 0 -0 0"]
+"RARM_ARM_eeff_finger" -> "RARM_END_EFFECTOR_finger"
+"RARM_END_EFFECTOR_finger" -> "gaze_ref_joint" [label="xyz: 0.25 0 0 \nrpy: 0 -0 0"]
+"gaze_ref_joint" -> "gaze_ref"
+"RARM_END_EFFECTOR" -> "RARM_ARM_eeff_grasp" [label="xyz: -0.08 0 0.04 \nrpy: 0 -1.5708 0"]
+"RARM_ARM_eeff_grasp" -> "RARM_END_EFFECTOR_grasp"
+"RARM_END_EFFECTOR_grasp" -> "RARM_ARM_eeff_grasp_end" [label="xyz: 0.045 0 0 \nrpy: 0 -0 0"]
+"RARM_ARM_eeff_grasp_end" -> "RARM_END_EFFECTOR_grasp_end"
+"base_link" -> "teleop_ref_joint" [label="xyz: 0.3 0 0 \nrpy: 3.14159 -0 0"]
+"teleop_ref_joint" -> "teleop_ref"
+}

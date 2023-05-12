@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<launch>
+    <include file="$(find spacenav_node)/launch/classic.launch"/>
+
+    <node
+        pkg="chonk_pushing"
+        type="action_client_teleop_2d.py"
+        name="action_client_teleop_2d"
+        output="screen"
+    >
+        <!-- <param name="target_position_x_R" type="double" value="0.3"/>
+        <param name="target_position_y_R" type="double" value="-0.2"/>
+        <param name="target_position_z_R" type="double" value="0.0"/> -->
+    </node>
+
+</launch>

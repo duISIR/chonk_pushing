@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- set global arguments -->
+    <arg name="robot_name" default="chonk"/>
+    <param name="robot_description_wholebody" command="$(find xacro)/xacro --inorder '$(find chonk_pushing)/urdf/chonk_pushing_wholebody.urdf'"/>
+    <!-- Launch a mux to send commands to the robot only from one source/controller -->
+    <node
+        name="mux_joint_position"
+        pkg="topic_tools"
+        type="mux" 
+        ns="/$(arg robot_name)"
+        args="streaming_controller/command
+            DefaultPositionController/command
+            ActionCmdPosePositionController/command
+            ActionCmdConfigPositionController/command
+            ActionTeleop2DPositionController/command
+            mux:=mux_joint_position"
+    />
+    <!-- Action Service Node for commanding end-effector poses -->
+    <node
+        name="action_server_cmd_config"
+        pkg="chonk_pushing"
+        ns="/$(arg robot_name)"
+        type="action_server_cmd_config.py"
+        output="screen"
+        args="streaming_controller/command"
+        >
+        <param name="cmd_topic_name" type="string" value="/$(arg robot_name)/ActionCmdConfigPositionController/command"/>
+        <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
+        <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
+    </node>
+    <!-- Action Service Node for commanding joint positions -->
+    <node
+        name="action_server_cmd_pose_wholebody"
+        pkg="chonk_pushing"
+        ns="/$(arg robot_name)"
+        type="action_server_cmd_pose_wholebody.py"
+        output="screen"
+        >
+        <param name="link_donkey" type="string" value="link_donkey"/>
+        <param name="link_ee_right" type="string" value="RARM_END_EFFECTOR_finger"/>
+        <param name="link_ee_left" type="string" value="LARM_END_EFFECTOR_finger"/>
+        <param name="link_head" type="string" value="CAMERA_HEAD_HEADING_Link"/>
+        <param name="link_gaze" type="string" value="gaze_ref"/>
+        <param name="cmd_topic_name" type="string" value="/$(arg robot_name)/ActionCmdPosePositionController/command"/>
+        <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
+        <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
+    </node>
+    <!-- Action Service Node for teleoperating robot in 2D -->
+
+    <!-- Spawn position controller -->
+
+<!--    <rosparam
+        file="$(find chonk_gazebo)/config/chonk_pushing_control_experiment.yaml"
+        command="load"
+        ns="$(arg robot_name)"
+    />
+    <node
+        name="position_controller"
+        pkg="controller_manager"
+        type="spawner"
+        ns="/$(arg robot_name)"
+        args="streaming_controller"
+        respawn="false"
+        output="screen"
+    />-->
+
+</launch>

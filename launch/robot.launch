@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- set global arguments -->
+    <arg name="robot_name" default="chonk"/>
+
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find chonk_pushing)/urdf/chonk_pushing.urdf.xacro'"/>
+
+    <!-- Spawn position controller -->
+    <node
+        name="position_controller"
+        pkg="controller_manager"
+        type="spawner"
+        ns="/$(arg robot_name)"
+        args="streaming_controller"
+        respawn="false"
+        output="screen"
+    />
+
+    <!-- convert joint states to TF transforms -->
+    <node
+        name="robot_state_publisher"
+        pkg="robot_state_publisher"
+        type="robot_state_publisher"
+        respawn="false"
+        output="screen"
+    >
+        <remap from="/joint_states" to="/$(arg robot_name)/joint_states" />
+    </node>
+
+</launch>
