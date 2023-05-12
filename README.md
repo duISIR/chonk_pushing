@@ -73,4 +73,4 @@ With motion planning of two end-effectors' positions and orientation, MPC tracki
 4. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation.py or
    rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation_turn.py 
 
-# chonk_pushing
+
