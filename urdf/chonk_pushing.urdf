@@ -1516,7 +1516,7 @@
   <gazebo>
     <plugin filename="libgazebo_ros_ft_sensor.so" name="LARM_ft_sensor">
       <updateRate>100.0</updateRate>
-      <topicName>ft_left/raw/data</topicName>
+      <topicName>/chonk/LARM/netft_data</topicName>
       <jointName>LARM_ft_sensor_joint</jointName>
     </plugin>
   </gazebo>
@@ -1588,7 +1588,7 @@
   <gazebo>
     <plugin filename="libgazebo_ros_ft_sensor.so" name="RARM_ft_sensor">
       <updateRate>100.0</updateRate>
-      <topicName>ft_right/raw/data</topicName>
+      <topicName>/chonk/RARM/netft_data</topicName>
       <jointName>RARM_ft_sensor_joint</jointName>
     </plugin>
   </gazebo>

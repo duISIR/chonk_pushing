@@ -23,11 +23,11 @@
     </xacro:meccanum_base_mount>
 
     <!-- F/T sensors -->
-    <xacro:ati_ft_sensor parent="LARM_JOINT5_Link" prefix="LARM_" topic_name="ft_left/raw/data">
+    <xacro:ati_ft_sensor parent="LARM_JOINT5_Link" prefix="LARM_" topic_name="/chonk/LARM/netft_data">
         <origin xyz="0 0 0" rpy="0 0 0"/>
     </xacro:ati_ft_sensor>
 
-    <xacro:ati_ft_sensor parent="RARM_JOINT5_Link" prefix="RARM_" topic_name="ft_right/raw/data">
+    <xacro:ati_ft_sensor parent="RARM_JOINT5_Link" prefix="RARM_" topic_name="/chonk/RARM/netft_data">
         <origin xyz="0 0 0" rpy="0 0 0"/>
     </xacro:ati_ft_sensor>
 

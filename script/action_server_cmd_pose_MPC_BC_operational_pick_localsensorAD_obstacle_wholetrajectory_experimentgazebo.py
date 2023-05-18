@@ -68,7 +68,7 @@ class CmdPoseActionServer(object):
         self._link_head = rospy.get_param('~link_head', 'link_head')
         self._link_gaze = rospy.get_param('~link_gaze', 'link_gaze')
         # control frequency
-        self._freq = rospy.get_param('~freq', 50)
+        self._freq = rospy.get_param('~freq', 40)
         # publishing command node name
         self._pub_cmd_topic_name = rospy.get_param('~cmd_topic_name', '/command')
         # load robot_description
@@ -83,9 +83,6 @@ class CmdPoseActionServer(object):
         self.ndof_base = 3
         self.ndof_position_control = len(self.joint_names) - self.ndof_base
         self.ndof = self.ndof_base + self.ndof_position_control
-        self.tf_listener = tf.TransformListener()
-        self.tf_listener.waitForTransform('/vicon/world', '/vicon/chonk/CHONK', rospy.Time(), rospy.Duration(1.0))
-
         ### ---------------------------------------------------------
         # initialize variables for planner
         self.q_curr = np.zeros(self.ndof); self.q_curr_joint = np.zeros(self.ndof_position_control); self.q_curr_base = np.zeros(self.ndof_base);
@@ -120,8 +117,8 @@ class CmdPoseActionServer(object):
         R_Right = builder_wholebodyMPC_planner.add_decision_variables('R_Right', 3, self.T_MPC_planner)
         R_Left = builder_wholebodyMPC_planner.add_decision_variables('R_Left', 3, self.T_MPC_planner)
 #        R_middle = builder_wholebodyMPC_planner.add_decision_variables('R_middle', 3, self.T_MPC_planner)
-#        r_ep = builder_wholebodyMPC_planner.add_decision_variables('r_ep', self.T_MPC_planner)
-#        r_ep_start = builder_wholebodyMPC_planner.add_decision_variables('r_ep_start', 12)
+        r_ep = builder_wholebodyMPC_planner.add_decision_variables('r_ep', self.T_MPC_planner)
+        r_ep_start = builder_wholebodyMPC_planner.add_decision_variables('r_ep_start', 12)
 
         duration_MPC_planner = builder_wholebodyMPC_planner.add_parameter('duration_MPC_planner', 1)
 
@@ -176,12 +173,12 @@ class CmdPoseActionServer(object):
 
 
         for i in range(self.T_MPC_planner):
-            obstacle_pos = np.asarray([[4.38], [1.64]])
-            obstacle_radius = 0.8
+            obstacle_pos = np.asarray([[4.37], [1.64]])
+            obstacle_radius = 1
 #            builder_wholebodyMPC_planner.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2 + r_ep[i])
             builder_wholebodyMPC_planner.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2)
 
-#        builder_wholebodyMPC_planner.add_cost_term('minimize_r_ep',  10*optas.sumsqr(r_ep))
+        builder_wholebodyMPC_planner.add_cost_term('minimize_r_ep',  10*optas.sumsqr(r_ep))
 
         # add position constraint at the beginning state
 #        builder_wholebodyMPC_planner.add_equality_constraint('init_r_middle', R_middle[:, 0], rhs=0.5*(init_r_position_Right + init_r_position_Left))
@@ -224,8 +221,8 @@ class CmdPoseActionServer(object):
 
 
 #        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_middle', dr_middle_var_MPC[:, 0], rhs=0.5*(init_dr_position_Right + init_dr_position_Left))
-        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Right', dr_RARM_var_MPC[0:3, 0], rhs=init_dr_position_Right[0:3])
-        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Left', dr_LARM_var_MPC[0:3, 0], rhs=init_dr_position_Left[0:3])
+        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Right', dr_RARM_var_MPC[0:2, 0], rhs=init_dr_position_Right[0:2])
+        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Left', dr_LARM_var_MPC[0:2, 0], rhs=init_dr_position_Left[0:2])
 #        builder_wholebodyMPC_planner.add_equality_constraint('final_dr_middle', dr_middle_var_MPC[:,-1], rhs=np.zeros(3))
         builder_wholebodyMPC_planner.add_equality_constraint('final_dr_right', dr_RARM_var_MPC[:,self.T_MPC_planner-1], rhs=np.zeros(3))
         builder_wholebodyMPC_planner.add_equality_constraint('final_dr_left', dr_LARM_var_MPC[:,self.T_MPC_planner-1], rhs=np.zeros(3))
@@ -255,7 +252,7 @@ class CmdPoseActionServer(object):
         builder_wholebodyMPC_planner.add_equality_constraint('final_ddr_right', ddr_RARM_var_MPC[:,self.T_MPC_planner-1], rhs=np.zeros(3))
         builder_wholebodyMPC_planner.add_equality_constraint('final_ddr_left', ddr_LARM_var_MPC[:,self.T_MPC_planner-1], rhs=np.zeros(3))
 
-        lower_acceleration = np.array([-1, -1, -0.5]); upper_acceleration = np.array([1, 1, 0.5]);
+        lower_acceleration = np.array([-1., -1., -0.5]); upper_acceleration = np.array([1., 1., 0.5]);
         for i in range(self.T_MPC_planner-2):
 #            builder_wholebodyMPC_planner.add_bound_inequality_constraint('ddr_acc_limit_right' + str(i), lhs=lower_acceleration-r_ep_start[6:9], mid=(1./duration_MPC_planner)**2 * self.n_planner * (self.n_planner - 1) * (R_Right[:, i+2] - 2 * R_Right[:, i+1] + R_Right[:, i]), rhs=upper_acceleration+r_ep_start[6:9])
 #            builder_wholebodyMPC_planner.add_bound_inequality_constraint('ddr_acc_limit_left' + str(i), lhs=lower_acceleration-r_ep_start[9:12], mid=(1./duration_MPC_planner)**2 * self.n_planner * (self.n_planner - 1) * (R_Left[:, i+2] - 2 * R_Left[:, i+1] +  R_Left[:, i]), rhs=upper_acceleration+r_ep_start[9:12])
@@ -275,8 +272,8 @@ class CmdPoseActionServer(object):
 
         # setup solver
         self.solver_wholebodyMPC_planner = optas.CasADiSolver(optimization=builder_wholebodyMPC_planner.build()).setup('knitro', solver_options={
-                                                                                                       'knitro.OutLev': 0,
-#                                                                                                       'print_time': 0,
+#                                                                                                       'knitro.OutLev': 0,
+                                                                                                       'print_time': 0,
                                                                                                        'knitro.act_qpalg': 1,
 #                                                                                                       'knitro.FeasTol': 5e-4, 'knitro.OptTol': 5e-4, 'knitro.ftol':5e-4,
                                                                                                        'knitro.algorithm':3, 'knitro.linsolver':2,
@@ -437,9 +434,9 @@ class CmdPoseActionServer(object):
 #            F_ext_Left_var_MPC[:, i] = F_ext_Left_actual + inertia_Left @ ddDelta_p_Left_var_MPC[:, i] + self.K_Left @ Delta_p_Left_var_MPC[:, i] + self.D_Left @ dDelta_p_Left_var_MPC[:, i]
             builder_wholebodyMPC.add_bound_inequality_constraint('control_point_' + str(i) + '_bound', lhs=lower, mid=Q[:, i], rhs=upper)
             # optimization cost: close to target
-            builder_wholebodyMPC.add_cost_term('Right_arm orientation' + str(i), 5*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i])-ori_R_reasonal[:, i]))
-            builder_wholebodyMPC.add_cost_term('Left_arm orientation' + str(i),  5*optas.sumsqr(self.ori_fnc_Left(q_var_MPC[:, i])-ori_L_reasonal[:, i]))
-            builder_wholebodyMPC.add_cost_term('Two_arm orientation parallel' + str(i), 2*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i]).T @ self.ori_fnc_Left(q_var_MPC[:, i])))
+            builder_wholebodyMPC.add_cost_term('Right_arm orientation' + str(i), 10*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i])-ori_R_reasonal[:, i]))
+            builder_wholebodyMPC.add_cost_term('Left_arm orientation' + str(i),  10*optas.sumsqr(self.ori_fnc_Left(q_var_MPC[:, i])-ori_L_reasonal[:, i]))
+            builder_wholebodyMPC.add_cost_term('Two_arm orientation parallel' + str(i), 5*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i]).T @ self.ori_fnc_Left(q_var_MPC[:, i])))
 
             builder_wholebodyMPC.add_cost_term('Right_arm position AD' + str(i), 2*optas.sumsqr(self.pos_fnc_Right(q_var_MPC[:, i])-pos_R_reasonal[:, i] - self.rotation_fnc_Right(init_position_MPC) @ Delta_p_Right_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('Left_arm position AD' + str(i),  2*optas.sumsqr(self.pos_fnc_Left(q_var_MPC[:, i])-pos_L_reasonal[:, i]  - self.rotation_fnc_Left(init_position_MPC) @ Delta_p_Left_var_MPC[:, i]))
@@ -510,8 +507,8 @@ class CmdPoseActionServer(object):
         # self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={'knitro.OutLev': 10} )
         # self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={'knitro.OutLev': 0, 'print_time': 0} )
         self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={
-                                                                                                       'knitro.OutLev': 0,
-#                                                                                                       'print_time': 0,
+#                                                                                                       'knitro.OutLev': 0,
+                                                                                                       'print_time': 0,
 #                                                                                                       'knitro.FeasTol': 1e-5, 'knitro.OptTol': 1e-5, 'knitro.ftol':1e-5,
                                                                                                        'knitro.algorithm':1,
                                                                                                        'knitro.linsolver':2,
@@ -555,15 +552,11 @@ class CmdPoseActionServer(object):
         self.eva_point = JointTrajectoryPoint()
         self.eva_point.time_from_start = rospy.Duration(0.1)
         self.eva_trajectory.points.append(self.eva_point)
-#        print("aaa")
-#        (trans,rot) = self.tf_listener.lookupTransform('/vicon/world', 'vicon/chonk/CHONK',  rospy.Time(0))
-#        (trans_box,rot_box) = self.tf_listener.lookupTransform('/vicon/world', 'vicon/eva_box/eva_box',  rospy.Time(0))
-#        print(trans)
         ### ---------------------------------------------------------
         # declare joint subscriber
         self._joint_sub = rospy.Subscriber("/chonk/joint_states", JointState, self.read_joint_states_cb)
-        self._joint_sub_base = rospy.Subscriber("/chonk/donkey_velocity_controller/odom", Odometry, self.read_base_states_cb)
-#        self._joint_sub_base = rospy.Subscriber("/chonk/base_pose_ground_truth", Odometry, self.read_base_states_cb)
+#        self._joint_sub_base = rospy.Subscriber("/chonk/donkey_velocity_controller/odom", Odometry, self.read_base_states_cb)
+        self._joint_sub_base = rospy.Subscriber("/chonk/base_pose_ground_truth", Odometry, self.read_base_states_cb)
         # declare joint publisher
         self._joint_pub = rospy.Publisher("/chonk/trajectory_controller/command", JointTrajectory, queue_size=10)
         # declare acceleration publisher for two arms
@@ -611,15 +604,6 @@ class CmdPoseActionServer(object):
         rospy.loginfo("%s: Request to send right arm to position (%.2f, %.2f, %.2f) with orientation (%.2f, %.2f, %.2f, %.2f), and left arm to position (%.2f, %.2f, %.2f) with orientation (%.2f, %.2f, %.2f, %.2f) in %.1f seconds." % (
                 self._name, self.pos_Right[0], self.pos_Right[1], self.pos_Right[2], self.ori_Right[0], self.ori_Right[1], self.ori_Right[2], self.ori_Right[3],
                 self.pos_Left[0], self.pos_Left[1], self.pos_Left[2], self.ori_Left[0], self.ori_Left[1], self.ori_Left[2], self.ori_Left[3], acceped_goal.duration))
-
-        # read current robot joint positions
-        try:
-            (trans,rot) = self.tf_listener.lookupTransform('/vicon/world', 'vicon/chonk/CHONK',  rospy.Time(0))
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-            print("error: cannot find vicon data!!!!")
-        self.base_euler_angle = tf.transformations.euler_from_quaternion([rot[0], rot[1], rot[2], rot[3]])
-        self.q_curr_base = [trans[0], trans[1], self.base_euler_angle[2]]
-
         # read current robot joint positions
         self.q_curr = np.concatenate((self.q_curr_base, self.q_curr_joint), axis=None)
         self.dq_curr = np.concatenate((self.dq_curr_base, self.dq_curr_joint), axis=None)
@@ -667,9 +651,6 @@ class CmdPoseActionServer(object):
             self.curr_MPC[:,i] = self.q_curr
 
     def timer_cb(self, event):
-        """ Publish the robot configuration """
-
-
         # make sure that the action is active
         if(not self._action_server.is_active()):
             self._timer.shutdown()
@@ -714,8 +695,7 @@ class CmdPoseActionServer(object):
                     pos_R_goal = optas.np.array(pos_R_goal).T
                     pos_L_goal = optas.np.array(pos_L_goal).T
                     self.solver_wholebodyMPC_planner.reset_initial_seed({f'R_Right': pos_R_goal,
-                                                                         f'R_Left': pos_L_goal
-#                                                                         f'r_ep': np.zeros(self.T_MPC_planner),
+                                                                         f'R_Left': pos_L_goal, f'r_ep': np.zeros(self.T_MPC_planner),
 #                                                                         f'r_ep_start': np.zeros(12)
                                                                          })
 #                    self.solver_wholebodyMPC_planner.reset_initial_seed({f'R_Right': np.zeros((3, self.T_MPC_planner)),
@@ -723,8 +703,8 @@ class CmdPoseActionServer(object):
                 # set initial seed
                 if self.solution_MPC_planner is not None:
                     self.solver_wholebodyMPC_planner.reset_initial_seed({f'R_Right': self.solution_MPC_planner[f'R_Right'],
-                                                                         f'R_Left': self.solution_MPC_planner[f'R_Left']
-#                                                                         f'r_ep': self.solution_MPC_planner[f'r_ep'],
+                                                                         f'R_Left': self.solution_MPC_planner[f'R_Left'],
+                                                                         f'r_ep': self.solution_MPC_planner[f'r_ep'],
 #                                                                         f'r_ep_start': self.solution_MPC_planner[f'r_ep_start']
                                                                          })
 
@@ -744,8 +724,7 @@ class CmdPoseActionServer(object):
 
                 for i in range(self.T_MPC):
                     self.ti_MPC = self._t[self._idx-1]  + self.dt_MPC*i
-#                    if((self.ti_MPC - self._t[self._idx-1]) <= self.duration_MPC_planner and self.duration_MPC_planner>= 2./self._freq):
-                    if((self.ti_MPC - self._t[self._idx-1]) <= self.duration_MPC_planner):
+                    if((self.ti_MPC - self._t[self._idx-1]) <= self.duration_MPC_planner and self.duration_MPC_planner>= 2./self._freq):
                         t_nomalized = (self.ti_MPC - self._t[self._idx-1])/self.duration_MPC_planner
                         for j in range(self.T_MPC_planner):
                             pos_R_reasonal[:, i] += self.BC(self.n_planner, j) * (t_nomalized)**j * (1-t_nomalized)**(self.n_planner-j) * R_Right[:, j]
@@ -869,7 +848,7 @@ class CmdPoseActionServer(object):
                 self.eva_trajectory.points[0].positions = self.q_next[-self.ndof_position_control:].tolist()
                 # update message
                 self._msg.data = self.q_next[-self.ndof_position_control:]
-                self._msg_velocity.linear.x = Local_v_b[0]; self._msg_velocity.linear.y = Local_v_b[1]; self._msg_velocity.angular.z = Local_w_b[2] * 6.05;
+                self._msg_velocity.linear.x = Local_v_b[0]; self._msg_velocity.linear.y = Local_v_b[1]; self._msg_velocity.angular.z = Local_w_b[2];
                 self._msg_acceleration.data = self.ddq_next[-self.ndof:]
                 # publish message
                 self._joint_pub.publish(self.eva_trajectory)
@@ -882,7 +861,7 @@ class CmdPoseActionServer(object):
                 # publish feedback
                 self._action_server.publish_feedback(self._feedback)
 
-#                print(rospy.get_time() - time_begin)
+                print(rospy.get_time() - time_begin)
 
             else:
                 # shutdown this timer
@@ -912,27 +891,18 @@ class CmdPoseActionServer(object):
         self.joint_names_position = msg.name[:self.ndof_position_control]
         self.dq_curr_joint = np.asarray(list(msg.velocity)[:self.ndof_position_control])
 
-#    def read_base_states_cb(self, msg):
-#        base_euler_angle = tf.transformations.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
-#        self.q_curr_base = [msg.pose.pose.position.x, msg.pose.pose.position.y, base_euler_angle[2]]
-#        self.donkey_R = optas.spatialmath.rotz(base_euler_angle[2])
-#        self.donkey_position = np.asarray([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
-#        self.donkey_velocity = np.asarray([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z])
-#        self.donkey_angular_velocity = np.asarray([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z])
-#        self.dq_curr_base = [float(msg.twist.twist.linear.x), float(msg.twist.twist.linear.y), float(msg.twist.twist.angular.z)]
     def read_base_states_cb(self, msg):
-        try:
-            (trans,rot) = self.tf_listener.lookupTransform('/vicon/world', 'vicon/chonk/CHONK', rospy.Time(0))
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-            print("error: cannot find vicon data!!!!")
-        self.base_euler_angle = tf.transformations.euler_from_quaternion([rot[0], rot[1], rot[2], rot[3]])
-        self.q_curr_base = np.asarray([trans[0], trans[1], self.base_euler_angle[2]])
-        self.donkey_R = optas.spatialmath.rotz(self.base_euler_angle[2])
-
-        self.donkey_position = np.asarray([trans[0], trans[1], trans[2]])
+        base_euler_angle = tf.transformations.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
+        self.q_curr_base = [msg.pose.pose.position.x, msg.pose.pose.position.y, base_euler_angle[2]]
+        self.donkey_R = optas.spatialmath.rotz(base_euler_angle[2])
+        self.donkey_position = np.asarray([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
         self.donkey_velocity = self.donkey_R @ np.asarray([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z])
-        self.donkey_angular_velocity = self.donkey_R @ np.asarray([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z/6.05])
-        self.dq_curr_base = np.asarray([self.donkey_velocity[0], self.donkey_velocity[1], self.donkey_angular_velocity[2]])
+        self.donkey_angular_velocity = self.donkey_R @ np.asarray([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z])
+        self.dq_curr_base = [float(msg.twist.twist.linear.x), float(msg.twist.twist.linear.y), float(msg.twist.twist.angular.z)]
+#        self.donkey_velocity = np.asarray([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z])
+#        self.donkey_angular_velocity =  np.asarray([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z])
+#        self.dq_curr_base = np.asarray([self.donkey_velocity[0], self.donkey_velocity[1], self.donkey_angular_velocity[2]])
+
 
 #    def read_right_ee_grasp_ft_data_cb(self, msg):
 #        self.F_ext_Right = np.asarray([ msg.data[0], msg.data[1], msg.data[2], 0, msg.data[4], 0])
