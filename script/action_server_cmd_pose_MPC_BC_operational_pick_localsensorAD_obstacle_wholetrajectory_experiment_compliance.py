@@ -329,7 +329,7 @@ class CmdPoseActionServer(object):
 
         self.m_ee_r = 0.3113;
         self.m_ee_l = 0.3113;
-        stiffness = 2000;
+        stiffness = 5000;
 
         inertia_Right = builder_wholebodyMPC.add_parameter('inertia_Right', 3, 3)  # inertia Right parameter
         inertia_Left = builder_wholebodyMPC.add_parameter('inertia_Left', 3, 3)  # inertia Left parameter

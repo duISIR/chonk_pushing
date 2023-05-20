@@ -139,7 +139,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--target_position_R', nargs=3,
         help="Give target position of the robot in meters.",
-        type=float, default=[trans_box[0]+0.26, trans_box[1]-1.2, 1.095],
+        type=float, default=[trans_box[0]+0.19, trans_box[1]-0.5, 1.095],
         metavar=('POS_X', 'POS_Y', 'POS_Z')
     )
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2 ,    np.pi/2]).getquat()
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     # parse left arm arguments
     parser.add_argument('--target_position_L', nargs=3,
         help="Give target position of the robot in meters.",
-        type=float, default=[trans_box[0]-0.26, trans_box[1]-1.2, 1.095],
+        type=float, default=[trans_box[0]-0.19, trans_box[1]-0.5, 1.095],
         metavar=('POS_X', 'POS_Y', 'POS_Z')
     )
 
@@ -216,8 +216,8 @@ if __name__ == '__main__':
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2 - np.pi/3,    np.pi/2]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
-    args['target_position_R'] = [trans_box[0]+0.26, trans_box[1], trans_box[2]]
-    args['target_position_L'] = [trans_box[0]-0.26, trans_box[1], trans_box[2]]
+    args['target_position_R'] = [trans_box[0]+0.19, trans_box[1], trans_box[2]]
+    args['target_position_L'] = [trans_box[0]-0.19, trans_box[1], trans_box[2]]
 
     # Initialize node class
     args['duration']=8.0
@@ -235,8 +235,8 @@ if __name__ == '__main__':
         args['target_torque_L'],
         args['duration']
     )
-    args['target_position_R'] = [trans_box[0]+0.22, trans_box[1], trans_box[2]]
-    args['target_position_L'] = [trans_box[0]-0.22, trans_box[1], trans_box[2]]
+    args['target_position_R'] = [trans_box[0]+0.15, trans_box[1], trans_box[2]]
+    args['target_position_L'] = [trans_box[0]-0.15, trans_box[1], trans_box[2]]
 
     # Initialize node class
     args['duration']=5.0
@@ -258,8 +258,8 @@ if __name__ == '__main__':
     args['m_box'] = m_box       # unit kg
     args['target_force_R'] = [0, 0, force]
     args['target_force_L'] = [0, 0, force]
-    args['target_position_R'] = [trans_box[0]+0.22, trans_box[1], trans_box[2]]
-    args['target_position_L'] = [trans_box[0]-0.22, trans_box[1], trans_box[2]]
+    args['target_position_R'] = [trans_box[0]+0.15, trans_box[1], trans_box[2]]
+    args['target_position_L'] = [trans_box[0]-0.15, trans_box[1], trans_box[2]]
 
     # Initialize node class
     args['duration']=5.0
@@ -280,8 +280,8 @@ if __name__ == '__main__':
 
     args['target_force_R'] = [0, 0, force]
     args['target_force_L'] = [0, 0, force]
-    args['target_position_R'] = [trans_box[0]+0.22, trans_box[1], trans_box[2]+0.15]
-    args['target_position_L'] = [trans_box[0]-0.22, trans_box[1], trans_box[2]+0.15]
+    args['target_position_R'] = [trans_box[0]+0.15, trans_box[1], trans_box[2]+0.15]
+    args['target_position_L'] = [trans_box[0]-0.15, trans_box[1], trans_box[2]+0.15]
 
     # Initialize node class
     args['duration']=5.0
@@ -302,8 +302,8 @@ if __name__ == '__main__':
 
     args['target_force_R'] = [0, 0, force]
     args['target_force_L'] = [0, 0, force]
-    args['target_position_R'] = [6.18, -0.22, trans_box[2]+0.1]
-    args['target_position_L'] = [6.18, +0.22, trans_box[2]+0.1]
+    args['target_position_R'] = [5.5, -0.15, trans_box[2]+0.15]
+    args['target_position_L'] = [5.5, +0.15, trans_box[2]+0.15]
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2 - np.pi/3,    0]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2 - np.pi/3,    0]).getquat()
@@ -328,8 +328,50 @@ if __name__ == '__main__':
 
     args['target_force_R'] = [0, 0, force]
     args['target_force_L'] = [0, 0, force]
-    args['target_position_R'] = [6.18, -0.22, trans_box[2]]
-    args['target_position_L'] = [6.18, +0.22, trans_box[2]]
+    args['target_position_R'] = [6.18, -0.15, trans_box[2]+0.15]
+    args['target_position_L'] = [6.18, +0.15, trans_box[2]+0.15]
+    args['duration']=3
+    cmd_pose_client = CmdPoseClient('client', client,
+        args['m_box'],
+        args['target_position_Donkey'],
+        args['target_orientation_Donkey'],
+        args['target_position_R'],
+        args['target_orientation_R'],
+        args['target_force_R'],
+        args['target_torque_R'],
+        args['target_position_L'],
+        args['target_orientation_L'],
+        args['target_force_L'],
+        args['target_torque_L'],
+        args['duration']
+    )
+
+    args['target_force_R'] = [0, 0, force]
+    args['target_force_L'] = [0, 0, force]
+    args['target_position_R'] = [6.18, -0.15, trans_box[2]]
+    args['target_position_L'] = [6.18, +0.15, trans_box[2]]
+    # Initialize node class
+    args['duration']=5
+    cmd_pose_client = CmdPoseClient('client', client,
+        args['m_box'],
+        args['target_position_Donkey'],
+        args['target_orientation_Donkey'],
+        args['target_position_R'],
+        args['target_orientation_R'],
+        args['target_force_R'],
+        args['target_torque_R'],
+        args['target_position_L'],
+        args['target_orientation_L'],
+        args['target_force_L'],
+        args['target_torque_L'],
+        args['duration']
+    )
+
+    args['m_box'] = 0
+    args['target_force_R'] = [0, 0, 0]
+    args['target_force_L'] = [0, 0, 0]
+    args['target_position_R'] = [6.18, -0.15, trans_box[2]]
+    args['target_position_L'] = [6.18, +0.15, trans_box[2]]
     # Initialize node class
     args['duration']=5
     cmd_pose_client = CmdPoseClient('client', client,
@@ -349,8 +391,8 @@ if __name__ == '__main__':
 
     args['target_force_R'] = [0, 0, 0]
     args['target_force_L'] = [0, 0, 0]
-    args['target_position_R'] = [6.18, -0.32, trans_box[2]]
-    args['target_position_L'] = [6.18, +0.32, trans_box[2]]
+    args['target_position_R'] = [6.18, -0.23, trans_box[2]]
+    args['target_position_L'] = [6.18, +0.23, trans_box[2]]
     # Initialize node class
     args['duration']=5
     cmd_pose_client = CmdPoseClient('client', client,
@@ -370,8 +412,8 @@ if __name__ == '__main__':
 
     args['target_force_R'] = [0, 0, 0]
     args['target_force_L'] = [0, 0, 0]
-    args['target_position_R'] = [5, -0.32, trans_box[2]]
-    args['target_position_L'] = [5, +0.32, trans_box[2]]
+    args['target_position_R'] = [5, -0.23, trans_box[2]]
+    args['target_position_L'] = [5, +0.23, trans_box[2]]
     # Initialize node class
     args['duration']=5
     cmd_pose_client = CmdPoseClient('client', client,

@@ -68,7 +68,7 @@ class CmdPoseActionServer(object):
         self._link_head = rospy.get_param('~link_head', 'link_head')
         self._link_gaze = rospy.get_param('~link_gaze', 'link_gaze')
         # control frequency
-        self._freq = rospy.get_param('~freq', 40)
+        self._freq = rospy.get_param('~freq', 50)
         # publishing command node name
         self._pub_cmd_topic_name = rospy.get_param('~cmd_topic_name', '/command')
         # load robot_description
@@ -434,12 +434,12 @@ class CmdPoseActionServer(object):
 #            F_ext_Left_var_MPC[:, i] = F_ext_Left_actual + inertia_Left @ ddDelta_p_Left_var_MPC[:, i] + self.K_Left @ Delta_p_Left_var_MPC[:, i] + self.D_Left @ dDelta_p_Left_var_MPC[:, i]
             builder_wholebodyMPC.add_bound_inequality_constraint('control_point_' + str(i) + '_bound', lhs=lower, mid=Q[:, i], rhs=upper)
             # optimization cost: close to target
-            builder_wholebodyMPC.add_cost_term('Right_arm orientation' + str(i), 10*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i])-ori_R_reasonal[:, i]))
-            builder_wholebodyMPC.add_cost_term('Left_arm orientation' + str(i),  10*optas.sumsqr(self.ori_fnc_Left(q_var_MPC[:, i])-ori_L_reasonal[:, i]))
-            builder_wholebodyMPC.add_cost_term('Two_arm orientation parallel' + str(i), 5*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i]).T @ self.ori_fnc_Left(q_var_MPC[:, i])))
+            builder_wholebodyMPC.add_cost_term('Right_arm orientation' + str(i), 5*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i])-ori_R_reasonal[:, i]))
+            builder_wholebodyMPC.add_cost_term('Left_arm orientation' + str(i),  5*optas.sumsqr(self.ori_fnc_Left(q_var_MPC[:, i])-ori_L_reasonal[:, i]))
+            builder_wholebodyMPC.add_cost_term('Two_arm orientation parallel' + str(i), 2.5*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i]).T @ self.ori_fnc_Left(q_var_MPC[:, i])))
 
-            builder_wholebodyMPC.add_cost_term('Right_arm position AD' + str(i), 2*optas.sumsqr(self.pos_fnc_Right(q_var_MPC[:, i])-pos_R_reasonal[:, i] - self.rotation_fnc_Right(init_position_MPC) @ Delta_p_Right_var_MPC[:, i]))
-            builder_wholebodyMPC.add_cost_term('Left_arm position AD' + str(i),  2*optas.sumsqr(self.pos_fnc_Left(q_var_MPC[:, i])-pos_L_reasonal[:, i]  - self.rotation_fnc_Left(init_position_MPC) @ Delta_p_Left_var_MPC[:, i]))
+            builder_wholebodyMPC.add_cost_term('Right_arm position AD' + str(i), 6*optas.sumsqr(self.pos_fnc_Right(q_var_MPC[:, i])-pos_R_reasonal[:, i] - self.rotation_fnc_Right(init_position_MPC) @ Delta_p_Right_var_MPC[:, i]))
+            builder_wholebodyMPC.add_cost_term('Left_arm position AD' + str(i),  6*optas.sumsqr(self.pos_fnc_Left(q_var_MPC[:, i])-pos_L_reasonal[:, i]  - self.rotation_fnc_Left(init_position_MPC) @ Delta_p_Left_var_MPC[:, i]))
             #####################################################################################
             builder_wholebodyMPC.add_cost_term('Right_arm Force world y' + str(i), 0.1*optas.sumsqr(self.rotation_fnc_Right(init_position_MPC) @ (F_ext_Right_var_MPC[:, i] - F_ext_Right_goal[:, i]) - 0.5*m_box * ddpos_box_goal[:, i]))
             builder_wholebodyMPC.add_cost_term('Left_arm Force world y' + str(i),  0.1*optas.sumsqr(self.rotation_fnc_Left(init_position_MPC) @ (F_ext_Left_var_MPC[:, i] - F_ext_Left_goal[:, i]) - 0.5*m_box * ddpos_box_goal[:, i]))
@@ -449,7 +449,7 @@ class CmdPoseActionServer(object):
 #            builder_wholebodyMPC.add_bound_inequality_constraint('right_force_limit' + str(i) + '_bound', lhs=-50, mid=F_ext_Right_var_MPC[1, i], rhs=50)
 #            builder_wholebodyMPC.add_bound_inequality_constraint('left_force_limit' + str(i) + '_bound', lhs=-50, mid=F_ext_Left_var_MPC[1, i], rhs=50)
             #####################################################################################
-            builder_wholebodyMPC.add_cost_term('twoarm_miniscope' + str(i), 0.1 * optas.sumsqr(q_var_MPC[6, i] + q_var_MPC[12, i]))
+            builder_wholebodyMPC.add_cost_term('twoarm_miniscope' + str(i), 0.01 * optas.sumsqr(q_var_MPC[6, i] + q_var_MPC[12, i]))
             builder_wholebodyMPC.add_cost_term('chest_miniscope' + str(i),  10*optas.sumsqr(q_var_MPC[3, i]))
             builder_wholebodyMPC.add_cost_term('arm_joint_miniscope' + str(i), 0.001 * optas.sumsqr(q_var_MPC[6:self.ndof, i]))
 #            builder_wholebodyMPC.add_cost_term('donkey_yaw_miniscope' + str(i), 0.1 * optas.sumsqr(q_var_MPC[2, i]))

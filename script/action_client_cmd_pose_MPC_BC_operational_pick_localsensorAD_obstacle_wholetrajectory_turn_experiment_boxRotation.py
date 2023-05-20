@@ -106,10 +106,14 @@ if __name__ == '__main__':
     # read current robot joint positions
     try:
         (trans_box,rot_box) = tf_listener.lookupTransform('/vicon/world', '/vicon/eva_box/eva_box',  rospy.Time(0))
-#        box_euler_angle = tf.transformations.euler_from_quaternion([rot_box[0], rot_box[1], rot_box[2], rot_box[3]])
-#        box_Rotation = optas.spatialmath.rotz(box_euler_angle[2])
         trans_box[2] += 0.2
-        print(trans_box)
+        box_euler_angle = tf.transformations.euler_from_quaternion([rot_box[0], rot_box[1], rot_box[2], rot_box[3]])
+        box_Rotation = optas.spatialmath.rotz(box_euler_angle[2])
+        box_inWorld = np.array([[trans_box[0]], [trans_box[1]], [trans_box[2]]])
+        T = optas.spatialmath.rt2tr(box_Rotation, box_inWorld)
+        print(T)
+        print(box_euler_angle[2])
+        print(box_inWorld)
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
         print("error: cannot find vicon data!!!!")
 #    trans_box = np.zeros(3)
@@ -139,12 +143,14 @@ if __name__ == '__main__':
         metavar=('QUAT_X','QUAT_Y','QUAT_Z','QUAT_W')
     )
 
+    Right_inbox = np.array([[-1.2], [-0.22], [0], [1]])
+    Right_inWorld = (T @ Right_inbox)[0:3]
     parser.add_argument('--target_position_R', nargs=3,
         help="Give target position of the robot in meters.",
-        type=float, default=[trans_box[0]+0.22, trans_box[1]-1.2, 1.095],
+        type=float, default=[Right_inWorld[0], Right_inWorld[1], 1.095],
         metavar=('POS_X', 'POS_Y', 'POS_Z')
     )
-    ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2- np.pi/3 ,    np.pi/2]).getquat()
+    ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2- np.pi/3 ,    box_euler_angle[2]]).getquat()
     parser.add_argument('--target_orientation_R', nargs=4,
         help="Give target orientation as a quaternion.",
         type=float, default=[ori_R[0], ori_R[1], ori_R[2], ori_R[3]],
@@ -161,13 +167,15 @@ if __name__ == '__main__':
         metavar=('torque_X','torque_Y','torque_Z')
     )
     # parse left arm arguments
+    Left_inbox = np.array([[-1.2], [0.22], [0], [1]])
+    Left_inWorld = (T @ Left_inbox)[0:3]
     parser.add_argument('--target_position_L', nargs=3,
         help="Give target position of the robot in meters.",
-        type=float, default=[trans_box[0]-0.22, trans_box[1]-1.2, 1.095],
+        type=float, default=[Left_inWorld[0], Left_inWorld[1], 1.095],
         metavar=('POS_X', 'POS_Y', 'POS_Z')
     )
 
-    ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2- np.pi/3 ,    np.pi/2]).getquat()
+    ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2- np.pi/3 ,    box_euler_angle[2]]).getquat()
     parser.add_argument('--target_orientation_L', nargs=4,
         help="Give target orientation as a quaternion.",
         type=float, default=[ori_L[0], ori_L[1], ori_L[2], ori_L[3]],
@@ -229,13 +237,17 @@ if __name__ == '__main__':
     # execute node
 #    rospy.spin()
 
-    ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2 - np.pi/3,    np.pi/2]).getquat()
+    ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2 - np.pi/3,    box_euler_angle[2]]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
-    ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2 - np.pi/3,    np.pi/2]).getquat()
+    ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2 - np.pi/3,    box_euler_angle[2]]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
-    args['target_position_R'] = [trans_box[0]+0.22, trans_box[1], trans_box[2]]
-    args['target_position_L'] = [trans_box[0]-0.22, trans_box[1], trans_box[2]]
+    Right_inbox = np.array([[0], [-0.22], [0], [1]])
+    Right_inWorld = (T @ Right_inbox)[0:3]
+    Left_inbox = np.array([[0], [0.22], [0], [1]])
+    Left_inWorld = (T @ Left_inbox)[0:3]
+    args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
+    args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
 
     # Initialize node class
     args['duration']=3.0
@@ -253,8 +265,12 @@ if __name__ == '__main__':
         args['target_torque_L'],
         args['duration']
     )
-    args['target_position_R'] = [trans_box[0]+0.135, trans_box[1], trans_box[2]]
-    args['target_position_L'] = [trans_box[0]-0.135, trans_box[1], trans_box[2]]
+    Right_inbox = np.array([[0], [-0.135], [0], [1]])
+    Right_inWorld = (T @ Right_inbox)[0:3]
+    Left_inbox = np.array([[0], [0.135], [0], [1]])
+    Left_inWorld = (T @ Left_inbox)[0:3]
+    args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
+    args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
 
     # Initialize node class
     args['duration']=4.0
@@ -276,8 +292,8 @@ if __name__ == '__main__':
     args['m_box'] = m_box       # unit kg
     args['target_force_R'] = [0, 0, force]
     args['target_force_L'] = [0, 0, force]
-    args['target_position_R'] = [trans_box[0]+0.135, trans_box[1], trans_box[2]]
-    args['target_position_L'] = [trans_box[0]-0.135, trans_box[1], trans_box[2]]
+    args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
+    args['target_position_L'] = [Left_inWorld[0],  Left_inWorld[1],  trans_box[2]]
 
     # Initialize node class
     args['duration']=4.0
@@ -299,8 +315,8 @@ if __name__ == '__main__':
 
     args['target_force_R'] = [0, 0, force]
     args['target_force_L'] = [0, 0, force]
-    args['target_position_R'] = [trans_box[0]+0.135, trans_box[1], trans_box[2]+0.15]
-    args['target_position_L'] = [trans_box[0]-0.135, trans_box[1], trans_box[2]+0.15]
+    args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1],trans_box[2]+0.15]
+    args['target_position_L'] = [Left_inWorld[0],  Left_inWorld[1], trans_box[2]+0.15]
 
     # Initialize node class
     args['duration']=4.0
