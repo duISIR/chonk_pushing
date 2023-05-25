@@ -3,7 +3,6 @@
 <launch>
     <!-- set global arguments -->
     <arg name="robot_name" default="chonk"/>
-    <param name="robot_description_wholebody" command="$(find xacro)/xacro --inorder '$(find chonk_pushing)/urdf/chonk_pushing_wholebody.urdf'"/>
 
     <!-- Spawn position controller -->
     <node
@@ -15,6 +14,7 @@
         respawn="false"
         output="screen"
     />
+
     <!-- Launch a mux to send commands to the robot only from one source/controller -->
     <node
         name="mux_joint_position"
@@ -22,7 +22,6 @@
         type="mux"
         ns="/$(arg robot_name)"
         args="trajectory_controller/command
-            streaming_controller/command
             DefaultPositionController/command
             ActionCmdPosePositionController/command
             ActionCmdConfigPositionController/command
@@ -43,10 +42,10 @@
     </node>
     <!-- Action Service Node for planning joint positions and build MPC to track the planning results -->
     <node
-        name="action_server_cmd_pose_MPC_BC_operational"
+        name="action_server_cmd_pose_MPC_BC_operational_AD"
         pkg="chonk_pushing"
         ns="/$(arg robot_name)"
-        type="action_server_cmd_pose_MPC_BC_operational_pick_experiment_bigbox.py"
+        type="action_server_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF.py"
         output="screen"
         >
         <param name="link_donkey" type="string" value="link_donkey"/>
@@ -62,5 +61,35 @@
         <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
         <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
     </node>
-
+    <!-- Action Service Node for teleoperating robot in 2D -->
+    <node
+        name="action_server_teleop_2d"
+        pkg="chonk_pushing"
+        ns="/$(arg robot_name)"
+        type="action_server_teleop_2d.py"
+        output="screen"
+        >
+        <param name="link_ee_right" type="string" value="RARM_END_EFFECTOR_finger"/>
+        <param name="link_ee_left" type="string" value="LARM_END_EFFECTOR_finger"/>
+        <param name="link_head" type="string" value="CAMERA_HEAD_HEADING_Link"/>
+        <param name="link_ref" type="string" value="teleop_ref"/>
+        <param name="link_gaze" type="string" value="gaze_ref"/>
+        <param name="cmd_topic_name" type="string" value="/$(arg robot_name)/ActionTeleop2DPositionController/command"/>
+        <param name="x_min" type="double" value="0.2"/>
+        <param name="x_max" type="double" value="0.8"/>
+        <param name="y_min" type="double" value="-0.5"/>
+        <param name="y_max" type="double" value="0.5"/>
+        <!-- <param name="roll_min" type="double" value="-25"/>
+        <param name="roll_max" type="double" value="25"/>
+        <param name="pitch_min" type="double" value="-20"/>
+        <param name="pitch_max" type="double" value="70"/> -->
+        <param name="roll_min" type="double" value="0"/>
+        <param name="roll_max" type="double" value="0"/>
+        <param name="pitch_min" type="double" value="0"/>
+        <param name="pitch_max" type="double" value="0"/>
+        <param name="yaw_min" type="double" value="-120"/>
+        <param name="yaw_max" type="double" value="120"/>
+        <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
+        <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
+    </node>
 </launch>

@@ -22,7 +22,6 @@
         type="mux"
         ns="/$(arg robot_name)"
         args="trajectory_controller/command
-            streaming_controller/command
             DefaultPositionController/command
             ActionCmdPosePositionController/command
             ActionCmdConfigPositionController/command
@@ -34,7 +33,7 @@
         name="action_server_cmd_config"
         pkg="chonk_pushing"
         ns="/$(arg robot_name)"
-        type="action_server_cmd_config.py"
+        type="action_server_cmd_config_wholetrajectory.py"
         output="screen"
         >
         <param name="cmd_topic_name" type="string" value="/$(arg robot_name)/ActionCmdConfigPositionController/command"/>
@@ -62,36 +61,6 @@
         <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
         <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
     </node>
-    <!-- Action Service Node for teleoperating robot in 2D -->
-    <node
-        name="action_server_teleop_2d"
-        pkg="chonk_pushing"
-        ns="/$(arg robot_name)"
-        type="action_server_teleop_2d.py"
-        output="screen"
-        >
-        <param name="link_ee_right" type="string" value="RARM_END_EFFECTOR_finger"/>
-        <param name="link_ee_left" type="string" value="LARM_END_EFFECTOR_finger"/>
-        <param name="link_head" type="string" value="CAMERA_HEAD_HEADING_Link"/>
-        <param name="link_ref" type="string" value="teleop_ref"/>
-        <param name="link_gaze" type="string" value="gaze_ref"/>
-        <param name="cmd_topic_name" type="string" value="/$(arg robot_name)/ActionTeleop2DPositionController/command"/>
-        <param name="x_min" type="double" value="0.2"/>
-        <param name="x_max" type="double" value="0.8"/>
-        <param name="y_min" type="double" value="-0.5"/>
-        <param name="y_max" type="double" value="0.5"/>
-        <!-- <param name="roll_min" type="double" value="-25"/>
-        <param name="roll_max" type="double" value="25"/>
-        <param name="pitch_min" type="double" value="-20"/>
-        <param name="pitch_max" type="double" value="70"/> -->
-        <param name="roll_min" type="double" value="0"/>
-        <param name="roll_max" type="double" value="0"/>
-        <param name="pitch_min" type="double" value="0"/>
-        <param name="pitch_max" type="double" value="0"/>
-        <param name="yaw_min" type="double" value="-120"/>
-        <param name="yaw_max" type="double" value="120"/>
-        <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
-        <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
-    </node>
+
 
 </launch>

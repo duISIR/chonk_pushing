@@ -79,7 +79,7 @@ class CmdPoseClient(object):
         pass
 
 if __name__ == '__main__':
-
+    delta_y = -0.83
     head_pub = rospy.Publisher("/chonk/head_states", Float64MultiArray, queue_size=10)
 
     _msg = Float64MultiArray()
@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--target_position_R', nargs=3,
         help="Give target position of the robot in meters.",
-        type=float, default=[1.45, 2.6, 1.0],
+        type=float, default=[1.45, 2.7+delta_y, 1.0],
         metavar=('POS_X', 'POS_Y', 'POS_Z')
     )
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2 - np.pi/3,    0]).getquat()
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     # parse left arm arguments
     parser.add_argument('--target_position_L', nargs=3,
         help="Give target position of the robot in meters.",
-        type=float, default=[1.45, 3.2, 1.0],
+        type=float, default=[1.45, 3.1+delta_y, 1.0],
         metavar=('POS_X', 'POS_Y', 'POS_Z')
     )
 
@@ -144,11 +144,13 @@ if __name__ == '__main__':
     client = actionlib.SimpleActionClient('/chonk/cmd_pose', CmdChonkPoseAction)
 
     head_pos1 = -0.15
-    head_pos2 = 0.25
+    head_pos2 = 0.27
+
+    single_displacement = 0.148
 #    head_pos2 = -0.15
 
 
-    _msg.data = np.array([head_pos1, head_pos1])
+    _msg.data = np.array([0, head_pos1])
     head_pub.publish(_msg)
     # Initialize node class
     cmd_pose_client = CmdPoseClient('client', client,
@@ -164,8 +166,8 @@ if __name__ == '__main__':
     _msg.data = np.array([head_pos1, head_pos2])
     head_pub.publish(_msg)
 
-    args['target_position_R'] = [1.45+0.6, 2.6, 1.0]
-    args['target_position_L'] = [1.45+0.6, 3.2, 1.0]
+    args['target_position_R'] = [1.45+0.6, 2.7+delta_y, 1.0]
+    args['target_position_L'] = [1.45+0.6, 3.1+delta_y, 1.0]
     args['duration']=5
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -182,8 +184,8 @@ if __name__ == '__main__':
     head_pub.publish(_msg)
 
 
-    args['target_position_R'] = [1.45+0.6, 2.6+0.06, 1.0]
-    args['target_position_L'] = [1.45+0.6, 3.2-0.06, 1.0]
+    args['target_position_R'] = [1.45+0.6, 2.6+single_displacement+delta_y, 1.0]
+    args['target_position_L'] = [1.45+0.6, 3.2-single_displacement+delta_y, 1.0]
     args['duration']=3
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -197,8 +199,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos2, head_pos2])
     head_pub.publish(_msg)
-    args['target_position_R'] = [1.45+0.6, 2.6+0.06, 1.1]
-    args['target_position_L'] = [1.45+0.6, 3.2-0.06, 1.1]
+    args['target_position_R'] = [1.45+0.6, 2.6+single_displacement+delta_y, 1.1]
+    args['target_position_L'] = [1.45+0.6, 3.2-single_displacement+delta_y, 1.1]
     args['duration']=3
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -212,8 +214,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos2, head_pos2])
     head_pub.publish(_msg)
-    args['target_position_R'] = [1.45+0.6, 2.6+0.06-2, 1.1]
-    args['target_position_L'] = [1.45+0.6, 3.2-0.06-2, 1.1]
+    args['target_position_R'] = [1.45+0.6, 2.6+single_displacement-2+delta_y, 1.1]
+    args['target_position_L'] = [1.45+0.6, 3.2-single_displacement-2+delta_y, 1.1]
     args['duration']=8
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -228,8 +230,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos2, head_pos2])
     head_pub.publish(_msg)
-    args['target_position_R'] = [1.45+0.6+5.8, 2.6+0.06-2, 1.1]
-    args['target_position_L'] = [1.45+0.6+5.8, 3.2-0.06-2, 1.1]
+    args['target_position_R'] = [1.45+0.6+5.8, 2.6+single_displacement-2+delta_y, 1.1]
+    args['target_position_L'] = [1.45+0.6+5.8, 3.2-single_displacement-2+delta_y, 1.1]
     args['duration']=15
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -244,8 +246,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos2, head_pos2])
     head_pub.publish(_msg)
-    args['target_position_R'] = [1.45+0.6+5.8, 2.6+0.06-2, 0.9]
-    args['target_position_L'] = [1.45+0.6+5.8, 3.2-0.06-2, 0.9]
+    args['target_position_R'] = [1.45+0.6+5.8, 2.6+single_displacement-2+delta_y, 0.9]
+    args['target_position_L'] = [1.45+0.6+5.8, 3.2-single_displacement-2+delta_y, 0.9]
     args['duration']=4
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -259,8 +261,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos2, head_pos1])
     head_pub.publish(_msg)
-    args['target_position_R'] = [1.45+0.6+5.8, 2.6-2, 0.9]
-    args['target_position_L'] = [1.45+0.6+5.8, 3.2-2, 0.9]
+    args['target_position_R'] = [1.45+0.6+5.8, 2.6-2+delta_y, 0.9]
+    args['target_position_L'] = [1.45+0.6+5.8, 3.2-2+delta_y, 0.9]
     args['duration']=4
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -274,8 +276,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos1, head_pos1])
     head_pub.publish(_msg)
-    args['target_position_R'] = [1.45+5.8, 2.6-2, 0.9]
-    args['target_position_L'] = [1.45+5.8, 3.2-2, 0.9]
+    args['target_position_R'] = [1.45+5.8, 2.6-2+delta_y, 0.9]
+    args['target_position_L'] = [1.45+5.8, 3.2-2+delta_y, 0.9]
     args['duration']=10
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -289,8 +291,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos1, head_pos1])
     head_pub.publish(_msg)
-    args['target_position_R'] = [7.25-1+0.2, 2.5, 0.9]
-    args['target_position_L'] = [7.25-1-0.2, 2.5, 0.9]
+    args['target_position_R'] = [7.25-1+0.2, 2.5+delta_y, 0.9]
+    args['target_position_L'] = [7.25-1-0.2, 2.5+delta_y, 0.9]
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2 ,    np.pi/2]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2 ,    np.pi/2]).getquat()
@@ -308,8 +310,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos1, head_pos1])
     head_pub.publish(_msg)
-    args['target_position_R'] = [7.25-2, 3.1-2, 0.9]
-    args['target_position_L'] = [7.25-2, 2.7-2, 0.9]
+    args['target_position_R'] = [7.25-2, 3.1-2+delta_y, 0.9]
+    args['target_position_L'] = [7.25-2, 2.7-2+delta_y, 0.9]
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2 ,    np.pi]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2 ,    np.pi]).getquat()
@@ -327,8 +329,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos1, head_pos1])
     head_pub.publish(_msg)
-    args['target_position_R'] = [7.25-6, 3.1-2, 0.9]
-    args['target_position_L'] = [7.25-6, 2.7-2, 0.9]
+    args['target_position_R'] = [7.25-6, 3.1-2+delta_y, 0.9]
+    args['target_position_L'] = [7.25-6, 2.7-2+delta_y, 0.9]
     args['duration']=10
     cmd_pose_client = CmdPoseClient('client', client,
         args['target_position_Donkey'],
@@ -342,8 +344,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos1, head_pos1])
     head_pub.publish(_msg)
-    args['target_position_R'] = [7.25-6+0.2, 2.5, 0.9]
-    args['target_position_L'] = [7.25-6-0.2, 2.5, 0.9]
+    args['target_position_R'] = [7.25-6+0.2, 2.5+delta_y, 0.9]
+    args['target_position_L'] = [7.25-6-0.2, 2.5+delta_y, 0.9]
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2 ,    np.pi/2]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2 ,    np.pi/2]).getquat()
@@ -361,8 +363,8 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos1, head_pos1])
     head_pub.publish(_msg)
-    args['target_position_R'] = [0.865+0.2, -0.15, 0.9]
-    args['target_position_L'] = [0.865+0.2, 0.15, 0.9]
+    args['target_position_R'] = [0.865+0.2, -0.15+delta_y, 0.9]
+    args['target_position_L'] = [0.865+0.2, 0.15+delta_y, 0.9]
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2 ,    0]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2 ,    0]).getquat()
@@ -382,8 +384,8 @@ if __name__ == '__main__':
 
 #    _msg.data = np.array([head_pos2, head_pos1])
 #    head_pub.publish(_msg)
-#    args['target_position_R'] = [2.25+0.3-0.06-2.4+0.1, 4.38-1.0, 1.03]
-#    args['target_position_L'] = [2.25-0.3+0.06-2.4-0.1, 4.38-1.0, 1.03]
+#    args['target_position_R'] = [2.25+0.3-single_displacement-2.4+0.1, 4.38-1.0, 1.03]
+#    args['target_position_L'] = [2.25-0.3+single_displacement-2.4-0.1, 4.38-1.0, 1.03]
 #    args['duration']=4
 #    cmd_pose_client = CmdPoseClient('client', client,
 #        args['target_position_Donkey'],
@@ -397,10 +399,10 @@ if __name__ == '__main__':
 
     _msg.data = np.array([head_pos1, head_pos1])
     head_pub.publish(_msg)
-    args['target_position_R'] = [0.865, -0.15, 0.9]
+    args['target_position_R'] = [0.865, -0.15+delta_y, 0.9]
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2,    0]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
-    args['target_position_L'] = [0.865, 0.15, 0.9]
+    args['target_position_L'] = [0.865, 0.15+delta_y, 0.9]
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2,    0]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
     args['duration']=3

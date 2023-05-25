@@ -34,6 +34,7 @@ from nav_msgs.msg import Odometry
 from urdf_parser_py.urdf import URDF
 import tf
 from X_fromRandP import X_fromRandP, X_fromRandP_different
+from numpy import deg2rad
 
 # For mux controller name
 from std_msgs.msg import String
@@ -272,7 +273,7 @@ class CmdPoseActionServer(object):
 
         # setup solver
         self.solver_wholebodyMPC_planner = optas.CasADiSolver(optimization=builder_wholebodyMPC_planner.build()).setup('knitro', solver_options={
-#                                                                                                       'knitro.OutLev': 0,
+                                                                                                       'knitro.OutLev': 0,
                                                                                                        'print_time': 0,
                                                                                                        'knitro.act_qpalg': 1,
 #                                                                                                       'knitro.FeasTol': 5e-4, 'knitro.OptTol': 5e-4, 'knitro.ftol':5e-4,
@@ -451,7 +452,8 @@ class CmdPoseActionServer(object):
             #####################################################################################
             builder_wholebodyMPC.add_cost_term('twoarm_miniscope' + str(i), 0.01 * optas.sumsqr(q_var_MPC[6, i] + q_var_MPC[12, i]))
             builder_wholebodyMPC.add_cost_term('chest_miniscope' + str(i),  10*optas.sumsqr(q_var_MPC[3, i]))
-            builder_wholebodyMPC.add_cost_term('arm_joint_miniscope' + str(i), 0.001 * optas.sumsqr(q_var_MPC[6:self.ndof, i]))
+            q_normal = np.array([0., 0., deg2rad(-30), 0., deg2rad(30), deg2rad(90), 0., 0., deg2rad(-30), 0., deg2rad(30), deg2rad(-90)])
+            builder_wholebodyMPC.add_cost_term('arm_joint_miniscope' + str(i), 0.001 * optas.sumsqr(q_var_MPC[6:self.ndof, i]-q_normal))
 #            builder_wholebodyMPC.add_cost_term('donkey_yaw_miniscope' + str(i), 0.1 * optas.sumsqr(q_var_MPC[2, i]))
             if(i<(self.T_MPC -1)):
                 builder_wholebodyMPC.add_cost_term('joint_distance' + str(i), 0.05 * optas.sumsqr(Q[:, i+1] - Q[:, i]))
@@ -507,7 +509,7 @@ class CmdPoseActionServer(object):
         # self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={'knitro.OutLev': 10} )
         # self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={'knitro.OutLev': 0, 'print_time': 0} )
         self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={
-#                                                                                                       'knitro.OutLev': 0,
+                                                                                                       'knitro.OutLev': 0,
                                                                                                        'print_time': 0,
 #                                                                                                       'knitro.FeasTol': 1e-5, 'knitro.OptTol': 1e-5, 'knitro.ftol':1e-5,
                                                                                                        'knitro.algorithm':1,
@@ -662,7 +664,7 @@ class CmdPoseActionServer(object):
         # main execution
         # main execution
         if(self._idx < self._steps):
-            time_begin = rospy.get_time()
+#            time_begin = rospy.get_time()
             if(self._correct_mux_selection):
                 # increment idx (in here counts starts with 1)
                 self._idx += 1
@@ -844,7 +846,8 @@ class CmdPoseActionServer(object):
 
                 self.duration_MPC_planner = self.duration - self._idx/self._freq
 
-                self.eva_trajectory.header.stamp = rospy.Time.now()
+#                self.eva_trajectory.header.stamp = rospy.Time.now()
+                self.eva_trajectory.header.stamp = rospy.Time(0)
                 self.eva_trajectory.points[0].positions = self.q_next[-self.ndof_position_control:].tolist()
                 # update message
                 self._msg.data = self.q_next[-self.ndof_position_control:]
@@ -861,7 +864,7 @@ class CmdPoseActionServer(object):
                 # publish feedback
                 self._action_server.publish_feedback(self._feedback)
 
-                print(rospy.get_time() - time_begin)
+#                print(rospy.get_time() - time_begin)
 
             else:
                 # shutdown this timer

@@ -34,7 +34,7 @@
         name="action_server_cmd_config"
         pkg="chonk_pushing"
         ns="/$(arg robot_name)"
-        type="action_server_cmd_config.py"
+        type="action_server_cmd_config_wholetrajectory.py"
         output="screen"
         >
         <param name="cmd_topic_name" type="string" value="/$(arg robot_name)/ActionCmdConfigPositionController/command"/>

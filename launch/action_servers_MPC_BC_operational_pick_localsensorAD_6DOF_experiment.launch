@@ -15,6 +15,7 @@
         respawn="false"
         output="screen"
     />
+
     <!-- Launch a mux to send commands to the robot only from one source/controller -->
     <node
         name="mux_joint_position"
@@ -22,7 +23,6 @@
         type="mux"
         ns="/$(arg robot_name)"
         args="trajectory_controller/command
-            streaming_controller/command
             DefaultPositionController/command
             ActionCmdPosePositionController/command
             ActionCmdConfigPositionController/command
@@ -43,10 +43,10 @@
     </node>
     <!-- Action Service Node for planning joint positions and build MPC to track the planning results -->
     <node
-        name="action_server_cmd_pose_MPC_BC_operational"
+        name="action_server_cmd_pose_MPC_BC_operational_AD"
         pkg="chonk_pushing"
         ns="/$(arg robot_name)"
-        type="action_server_cmd_pose_MPC_BC_operational_pick_experiment_bigbox.py"
+        type="action_server_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF_experiment.py"
         output="screen"
         >
         <param name="link_donkey" type="string" value="link_donkey"/>
@@ -62,5 +62,4 @@
         <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
         <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
     </node>
-
 </launch>

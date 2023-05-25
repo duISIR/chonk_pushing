@@ -68,7 +68,7 @@ class CmdPoseActionServer(object):
         self._link_head = rospy.get_param('~link_head', 'link_head')
         self._link_gaze = rospy.get_param('~link_gaze', 'link_gaze')
         # control frequency
-        self._freq = rospy.get_param('~freq', 40)
+        self._freq = rospy.get_param('~freq', 50)
         # publishing command node name
         self._pub_cmd_topic_name = rospy.get_param('~cmd_topic_name', '/command')
         # load robot_description
@@ -178,8 +178,10 @@ class CmdPoseActionServer(object):
 #            builder_wholebodyMPC_planner.add_leq_inequality_constraint('quaternion_equality_left' + str(i),  lhs=optas.sumsqr(R_ori_Left[:, i]), rhs=1. + r_ori_ep[1, i])
             builder_wholebodyMPC_planner.add_equality_constraint('quaternion_equality_right' + str(i),  lhs=optas.sumsqr(R_ori_Right[:, i]), rhs=1.)
             builder_wholebodyMPC_planner.add_equality_constraint('quaternion_equality_left' + str(i),  lhs=optas.sumsqr(R_ori_Left[:, i]), rhs=1.)
-            builder_wholebodyMPC_planner.add_cost_term('Two_arm orientation parallel' + str(i), optas.sumsqr(R_ori_Right[:, i].T @ R_ori_Left[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('Two_arm orientation parallel' + str(i), optas.sumsqr(R_ori_Right[:, i].T @ R_ori_Left[:, i]))
             builder_wholebodyMPC_planner.add_cost_term('Two_arm end height same' + str(i), optas.sumsqr(R_pos_Right[2, i] - R_pos_Left[2, i]))
+            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align' + str(i), optas.sumsqr( self.skew_optas(self.quatToRotationZ(R_ori_Right[:, i])) @ (R_pos_Right[:, i] - R_pos_Left[:, i])   ))
+            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align' + str(i), optas.sumsqr( self.skew_optas(self.quatToRotationZ(R_ori_Left[:, i])) @ (R_pos_Right[:, i] - R_pos_Left[:, i])   ))
 
 
 #            builder_wholebodyMPC_planner.add_cost_term('Right_arm_obstacle_x' + str(i),  optas.sumsqr(r_pos_RARM_var_MPC[0, i] - pos_R[0, i]))
@@ -335,7 +337,7 @@ class CmdPoseActionServer(object):
 
         # setup solver
         self.solver_wholebodyMPC_planner = optas.CasADiSolver(optimization=builder_wholebodyMPC_planner.build()).setup('knitro', solver_options={
-#                                                                                                       'knitro.OutLev': 0,
+                                                                                                       'knitro.OutLev': 0,
                                                                                                        'print_time': 0,
 #                                                                                                       'knitro.par_msnumthreads': 14,
                                                                                                        'knitro.act_qpalg': 1,
@@ -503,7 +505,7 @@ class CmdPoseActionServer(object):
             # optimization cost: close to target
             builder_wholebodyMPC.add_cost_term('Right_arm orientation' + str(i), optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i])-ori_R_reasonal[:, i]))
             builder_wholebodyMPC.add_cost_term('Left_arm orientation' + str(i),  optas.sumsqr(self.ori_fnc_Left(q_var_MPC[:, i])-ori_L_reasonal[:, i]))
-            builder_wholebodyMPC.add_cost_term('Two_arm orientation parallel' + str(i), 0.1*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i]).T @ self.ori_fnc_Left(q_var_MPC[:, i])))
+#            builder_wholebodyMPC.add_cost_term('Two_arm orientation parallel' + str(i), 0.1*optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i]).T @ self.ori_fnc_Left(q_var_MPC[:, i])))
 #            quaternion_donkey_start = optas.spatialmath.Quaternion.fromrpy([np.pi/2,    0,    0]).getquat()
 #            builder_wholebodyMPC.add_cost_term('Two_arm orientation parallel with donkey plane' + str(i), 10*optas.sumsqr(self.ori_fnc_donkey(q_var_MPC[:, i]).__mul__(quaternion_donkey_start).T @ self.ori_fnc_Right(q_var_MPC[:, i]) ))
 
@@ -948,7 +950,9 @@ class CmdPoseActionServer(object):
 
                 self.duration_MPC_planner = self.duration - self._idx/self._freq
 
-                self.eva_trajectory.header.stamp = rospy.Time.now()
+#                self.eva_trajectory.header.stamp = rospy.Time.now()
+                self.eva_trajectory.header.stamp = rospy.Time(0)
+
                 self.eva_trajectory.points[0].positions = self.q_next[-self.ndof_position_control:].tolist()
                 # update message
                 self._msg.data = self.q_next[-self.ndof_position_control:]
@@ -1029,6 +1033,13 @@ class CmdPoseActionServer(object):
         A = np.asarray([ [0, -vec[2], vec[1]], [vec[2], 0, -vec[0]], [-vec[1], vec[0], 0]])
         return A
 
+    def skew_optas(self, vec):
+        A = optas.casadi.SX(np.zeros((3, 3)))
+        A[0, 0] =  0;      A[0, 1] = -vec[2]; A[0, 2] =  vec[1];
+        A[1, 0] =  vec[2]; A[1, 1] = 0;       A[1, 2] = -vec[0];
+        A[2, 0] = -vec[1]; A[2, 1] = vec[0];  A[2, 2] =  0;
+        return A
+
     def angular_velocity_to_quaternionRate(self, quaternion):
         A = 0.5* np.asarray([ [  quaternion[3],  quaternion[2], -quaternion[1] ],
                               [ -quaternion[2],  quaternion[3],  quaternion[0] ],
@@ -1040,6 +1051,13 @@ class CmdPoseActionServer(object):
 #        A[1,0] = -quaternion[2]; A[1,1] =  quaternion[3]; A[1,2] =  quaternion[0];
 #        A[2,0] =  quaternion[1]; A[2,1] = -quaternion[0]; A[2,2] =  quaternion[3];
 #        A[3,0] = -quaternion[0]; A[3,1] = -quaternion[1]; A[3,2] = -quaternion[2];
+        return A
+
+    def quatToRotationZ(self, quaternion):
+        A = optas.casadi.SX(np.zeros(3))
+        A[0] = 2 * (quaternion[0] * quaternion[2]) + (quaternion[3] * quaternion[1])
+        A[1] = 2 * (quaternion[1] * quaternion[2]) - (quaternion[3] * quaternion[0])
+        A[2] = 1 - 2 * (quaternion[0]**2 + quaternion[1]**2)
         return A
 
 if __name__=="__main__":

@@ -24,14 +24,24 @@
         type="mux"
         ns="/$(arg robot_name)"
         args="trajectory_controller/command
-            streaming_controller/command
             DefaultPositionController/command
             ActionCmdPosePositionController/command
             ActionCmdConfigPositionController/command
             ActionTeleop2DPositionController/command
             mux:=mux_joint_position"
     />
-
+    <!-- Action Service Node for commanding end-effector poses -->
+    <node
+        name="action_server_cmd_config"
+        pkg="chonk_pushing"
+        ns="/$(arg robot_name)"
+        type="action_server_cmd_config_wholetrajectory.py"
+        output="screen"
+        >
+        <param name="cmd_topic_name" type="string" value="/$(arg robot_name)/ActionCmdConfigPositionController/command"/>
+        <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
+        <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
+    </node>
     <!-- Action Service Node for planning joint positions and build MPC to track the planning results -->
     <node
         name="action_server_cmd_pose_MPC_BC_operational_AD"
