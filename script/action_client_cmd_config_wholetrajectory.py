@@ -62,7 +62,7 @@ if __name__ == '__main__':
         type=float, default=[0., 0., 0., 0., 0., -30., 0., 30., 90., 0., 0., -30., 0., 30., -90],
         metavar=('CHEST_JOINT0', 'HEAD_JOINT0', 'HEAD_JOINT1', 'LARM_JOINT0', 'LARM_JOINT1', 'LARM_JOINT2', 'LARM_JOINT3', 'LARM_JOINT4', 'LARM_JOINT5', 'RARM_JOINT0', 'RARM_JOINT1', 'RARM_JOINT2', 'RARM_JOINT3', 'RARM_JOINT4', 'RARM_JOINT5' )
     )
-    parser.add_argument("--duration", help="Give duration of motion in seconds.", type=float, default=5.0)
+    parser.add_argument("--duration", help="Give duration of motion in seconds.", type=float, default=4.0)
     args = vars(parser.parse_args())
     # get arguments
     target_config = [deg2rad(q) for q in args['target_config']]

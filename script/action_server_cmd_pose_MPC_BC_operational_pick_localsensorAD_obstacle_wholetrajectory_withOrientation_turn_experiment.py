@@ -40,6 +40,7 @@ from std_msgs.msg import String
 # service for selecting the controller
 from topic_tools.srv import MuxSelect
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+import numpy as np
 
 
 class CmdPoseActionServer(object):
@@ -83,6 +84,8 @@ class CmdPoseActionServer(object):
         self.ndof_base = 3
         self.ndof_position_control = len(self.joint_names) - self.ndof_base
         self.ndof = self.ndof_base + self.ndof_position_control
+        self.tf_listener = tf.TransformListener()
+        self.tf_listener.waitForTransform('/vicon/world', '/vicon/chonk/CHONK', rospy.Time(), rospy.Duration(1.0))
         ### ---------------------------------------------------------
         # initialize variables for planner
         self.q_curr = np.zeros(self.ndof); self.q_curr_joint = np.zeros(self.ndof_position_control); self.q_curr_base = np.zeros(self.ndof_base);
@@ -100,7 +103,7 @@ class CmdPoseActionServer(object):
         )
         self.wholebodyMPC_planner_name = self.wholebodyMPC_planner.get_name()
 #        self.dt_MPC_planner = 0.1 # time step
-        self.T_MPC_planner = 12 # T is number of time steps
+        self.T_MPC_planner = 10 # T is number of time steps
 #        self.duration_MPC_planner = float(self.T_MPC_planner-1)*self.dt_MPC_planner
         # nominal robot configuration
         self.wholebodyMPC_planner_opt_idx = self.wholebodyMPC_planner.optimized_joint_indexes
@@ -139,7 +142,7 @@ class CmdPoseActionServer(object):
         t = np.linspace(0., 1., self.T_MPC_planner)
         self.n_planner = self.T_MPC_planner -1 # N in Bezier curve
         # Add parameters
-#        init_r_position_middle = builder_wholebodyMPC_planner.add_parameter('init_r_position_middle', 2)   
+#        init_r_position_middle = builder_wholebodyMPC_planner.add_parameter('init_r_position_middle', 2)
         init_r_position_Right = builder_wholebodyMPC_planner.add_parameter('init_r_position_Right', 3)
         init_r_position_Left = builder_wholebodyMPC_planner.add_parameter('init_r_position_Left', 3)
         init_r_orientation_Right = builder_wholebodyMPC_planner.add_parameter('init_r_orientation_Right', 4)
@@ -149,6 +152,7 @@ class CmdPoseActionServer(object):
         init_dr_position_Left = builder_wholebodyMPC_planner.add_parameter('init_dr_position_Left', 3)
         init_dr_orientation_Right = builder_wholebodyMPC_planner.add_parameter('init_dr_orientation_Right', 4)
         init_dr_orientation_Left = builder_wholebodyMPC_planner.add_parameter('init_dr_orientation_Left', 4)
+        quaternion_fixed180 = np.array([1, 0, 0, 0])
 
         # get end-effector pose as parameters
         pos_R = builder_wholebodyMPC_planner.add_parameter('pos_R', 3)
@@ -178,10 +182,17 @@ class CmdPoseActionServer(object):
 #            builder_wholebodyMPC_planner.add_leq_inequality_constraint('quaternion_equality_left' + str(i),  lhs=optas.sumsqr(R_ori_Left[:, i]), rhs=1. + r_ori_ep[1, i])
             builder_wholebodyMPC_planner.add_equality_constraint('quaternion_equality_right' + str(i),  lhs=optas.sumsqr(R_ori_Right[:, i]), rhs=1.)
             builder_wholebodyMPC_planner.add_equality_constraint('quaternion_equality_left' + str(i),  lhs=optas.sumsqr(R_ori_Left[:, i]), rhs=1.)
-#            builder_wholebodyMPC_planner.add_cost_term('Two_arm orientation parallel' + str(i), optas.sumsqr(R_ori_Right[:, i].T @ R_ori_Left[:, i]))
+            builder_wholebodyMPC_planner.add_cost_term('Two_arm orientation parallel' + str(i), 20*optas.sumsqr(R_ori_Right[:, i] -  self.qaQb( R_ori_Left[:, i], quaternion_fixed180 )))
             builder_wholebodyMPC_planner.add_cost_term('Two_arm end height same' + str(i), optas.sumsqr(R_pos_Right[2, i] - R_pos_Left[2, i]))
-            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align' + str(i), optas.sumsqr( self.skew_optas(self.quatToRotationZ(R_ori_Right[:, i])) @ (R_pos_Right[:, i] - R_pos_Left[:, i])   ))
-            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align' + str(i), optas.sumsqr( self.skew_optas(self.quatToRotationZ(R_ori_Left[:, i])) @ (R_pos_Right[:, i] - R_pos_Left[:, i])   ))
+#            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align' + str(i), 5*optas.sumsqr( self.skew_optas(self.quatToRotationZ(r_ori_RARM_var_MPC[:, i])) @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+#            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align' + str(i), 5*optas.sumsqr( self.skew_optas(self.quatToRotationZ(r_ori_LARM_var_MPC[:, i])) @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_x' + str(i), 50*optas.sumsqr( self.quatToRotationX(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_y' + str(i), 5*optas.sumsqr( self.quatToRotationY(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+
+#            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align_x' + str(i), 50*optas.sumsqr( self.quatToRotationX(r_ori_LARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+
+#            if(i>0):
+#                builder_wholebodyMPC_planner.add_equality_constraint('Two_arm orientation parallel' + str(i), lhs=R_ori_Right[:, i], rhs= self.qaQb( R_ori_Left[:, i], quaternion_fixed180 ))
 
 
 #            builder_wholebodyMPC_planner.add_cost_term('Right_arm_obstacle_x' + str(i),  optas.sumsqr(r_pos_RARM_var_MPC[0, i] - pos_R[0, i]))
@@ -206,8 +217,8 @@ class CmdPoseActionServer(object):
 
 
         for i in range(self.T_MPC_planner):
-            obstacle_pos = np.asarray([[4], [0]])
-            obstacle_radius = 0.3 + 1
+            obstacle_pos = np.asarray([[4.67], [1.63-0.83]])
+            obstacle_radius = 0.8
 #            builder_wholebodyMPC_planner.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2 + r_ep[i])
             builder_wholebodyMPC_planner.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2)
 
@@ -584,7 +595,7 @@ class CmdPoseActionServer(object):
         self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={
                                                                                                        'knitro.OutLev': 0,
                                                                                                        'print_time': 0,
-                                                                                                       'knitro.FeasTol': 1e-5, 'knitro.OptTol': 1e-5, 'knitro.ftol':1e-5,
+#                                                                                                       'knitro.FeasTol': 1e-5, 'knitro.OptTol': 1e-5, 'knitro.ftol':1e-5,
                                                                                                        'knitro.algorithm':1,
                                                                                                        'knitro.linsolver':2,
 #                                                                                                       'knitro.maxtime_real': 1.8e-2,
@@ -630,8 +641,8 @@ class CmdPoseActionServer(object):
         ### ---------------------------------------------------------
         # declare joint subscriber
         self._joint_sub = rospy.Subscriber("/chonk/joint_states", JointState, self.read_joint_states_cb)
-#        self._joint_sub_base = rospy.Subscriber("/chonk/donkey_velocity_controller/odom", Odometry, self.read_base_states_cb)
-        self._joint_sub_base = rospy.Subscriber("/chonk/base_pose_ground_truth", Odometry, self.read_base_states_cb)
+        self._joint_sub_base = rospy.Subscriber("/chonk/donkey_velocity_controller/odom", Odometry, self.read_base_states_cb)
+#        self._joint_sub_base = rospy.Subscriber("/chonk/base_pose_ground_truth", Odometry, self.read_base_states_cb)
         # declare joint publisher
         self._joint_pub = rospy.Publisher("/chonk/trajectory_controller/command", JointTrajectory, queue_size=10)
         # declare acceleration publisher for two arms
@@ -680,6 +691,13 @@ class CmdPoseActionServer(object):
                 self._name, self.pos_Right[0], self.pos_Right[1], self.pos_Right[2], self.ori_Right[0], self.ori_Right[1], self.ori_Right[2], self.ori_Right[3],
                 self.pos_Left[0], self.pos_Left[1], self.pos_Left[2], self.ori_Left[0], self.ori_Left[1], self.ori_Left[2], self.ori_Left[3], acceped_goal.duration))
         # read current robot joint positions
+        try:
+            (trans,rot) = self.tf_listener.lookupTransform('/vicon/world', 'vicon/chonk/CHONK',  rospy.Time(0))
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            print("error: cannot find vicon data!!!!")
+        self.base_euler_angle = tf.transformations.euler_from_quaternion([rot[0], rot[1], rot[2], rot[3]])
+        self.q_curr_base = [trans[0], trans[1], self.base_euler_angle[2]]
+
         self.q_curr = np.concatenate((self.q_curr_base, self.q_curr_joint), axis=None)
         self.dq_curr = np.concatenate((self.dq_curr_base, self.dq_curr_joint), axis=None)
         qT = np.zeros(self.ndof)
@@ -942,6 +960,15 @@ class CmdPoseActionServer(object):
                 self.Derivation_RARM_pos_start[1] = np.asarray(self.pos_fnc_Right(self.q_next)).T[0][1] - np.asarray(self.pos_fnc_Right(self.q_curr)).T[0][1]
                 self.Derivation_LARM_pos_start[1] = np.asarray(self.pos_fnc_Left(self.q_next)).T[0][1] - np.asarray(self.pos_fnc_Left(self.q_curr)).T[0][1]
 
+#                print('r')
+#                print(self.qaConjugateQb_numpy(self.ori_fnc_Left(self.q_curr), self.ori_fnc_Right(self.q_curr)))
+#                print( self.quatToRotationX( self.ori_fnc_Right(self.q_curr)  ).T @ (self.pos_fnc_Right(self.q_curr) - self.pos_fnc_Left(self.q_curr))       )
+#                print( self.quatToRotationY( self.ori_fnc_Right(self.q_curr)  ).T @ (self.pos_fnc_Right(self.q_curr) - self.pos_fnc_Left(self.q_curr))       )
+
+                #                print('l')
+#                print(self.ori_fnc_Left(self.q_curr))
+
+
                 # compute the donkey velocity in its local frame
                 Global_w_b = np.asarray([0., 0., self.dq_next[2]])
                 Global_v_b = np.asarray([self.dq_next[0], self.dq_next[1], 0.])
@@ -956,7 +983,7 @@ class CmdPoseActionServer(object):
                 self.eva_trajectory.points[0].positions = self.q_next[-self.ndof_position_control:].tolist()
                 # update message
                 self._msg.data = self.q_next[-self.ndof_position_control:]
-                self._msg_velocity.linear.x = Local_v_b[0]; self._msg_velocity.linear.y = Local_v_b[1]; self._msg_velocity.angular.z = Local_w_b[2];
+                self._msg_velocity.linear.x = Local_v_b[0]; self._msg_velocity.linear.y = Local_v_b[1]; self._msg_velocity.angular.z = Local_w_b[2]*6.05;
                 self._msg_acceleration.data = self.ddq_next[-self.ndof:]
                 # publish message
                 self._joint_pub.publish(self.eva_trajectory)
@@ -997,15 +1024,28 @@ class CmdPoseActionServer(object):
         self.joint_names_position = msg.name[:self.ndof_position_control]
         self.dq_curr_joint = np.asarray(list(msg.velocity)[:self.ndof_position_control])
 
-    def read_base_states_cb(self, msg):
-        base_euler_angle = tf.transformations.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
-        self.q_curr_base = [msg.pose.pose.position.x, msg.pose.pose.position.y, base_euler_angle[2]]
-        self.donkey_R = optas.spatialmath.rotz(base_euler_angle[2])
-        self.donkey_position = np.asarray([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
-        self.donkey_velocity = np.asarray([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z])
-        self.donkey_angular_velocity = np.asarray([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z])
-        self.dq_curr_base = [float(msg.twist.twist.linear.x), float(msg.twist.twist.linear.y), float(msg.twist.twist.angular.z)]
+#    def read_base_states_cb(self, msg):
+#        base_euler_angle = tf.transformations.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
+#        self.q_curr_base = [msg.pose.pose.position.x, msg.pose.pose.position.y, base_euler_angle[2]]
+#        self.donkey_R = optas.spatialmath.rotz(base_euler_angle[2])
+#        self.donkey_position = np.asarray([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
+#        self.donkey_velocity = np.asarray([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z])
+#        self.donkey_angular_velocity = np.asarray([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z])
+#        self.dq_curr_base = [float(msg.twist.twist.linear.x), float(msg.twist.twist.linear.y), float(msg.twist.twist.angular.z)]
 
+    def read_base_states_cb(self, msg):
+        try:
+            (trans,rot) = self.tf_listener.lookupTransform('/vicon/world', 'vicon/chonk/CHONK', rospy.Time(0))
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            print("error: cannot find vicon data!!!!")
+        self.base_euler_angle = tf.transformations.euler_from_quaternion([rot[0], rot[1], rot[2], rot[3]])
+        self.q_curr_base = np.asarray([trans[0], trans[1], self.base_euler_angle[2]])
+        self.donkey_R = optas.spatialmath.rotz(self.base_euler_angle[2])
+
+        self.donkey_position = np.asarray([trans[0], trans[1], trans[2]])
+        self.donkey_velocity = self.donkey_R @ np.asarray([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z])
+        self.donkey_angular_velocity = self.donkey_R @ np.asarray([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z/6.05])
+        self.dq_curr_base = np.asarray([self.donkey_velocity[0], self.donkey_velocity[1], self.donkey_angular_velocity[2]])
 #    def read_right_ee_grasp_ft_data_cb(self, msg):
 #        self.F_ext_Right = np.asarray([ msg.data[0], msg.data[1], msg.data[2], 0, msg.data[4], 0])
 
@@ -1053,12 +1093,45 @@ class CmdPoseActionServer(object):
 #        A[3,0] = -quaternion[0]; A[3,1] = -quaternion[1]; A[3,2] = -quaternion[2];
         return A
 
+
+
+    def quatToRotationX(self, quaternion):
+        A = optas.casadi.SX(np.zeros(3))
+        A[0] = 1 - 2 * (quaternion[1]**2 + quaternion[2]**2)
+        A[1] = 2 * (quaternion[0] * quaternion[1]) + (quaternion[3] * quaternion[2])
+        A[2] = 2 * (quaternion[0] * quaternion[2]) - (quaternion[3] * quaternion[1])
+        return A
+
+    def quatToRotationY(self, quaternion):
+        A = optas.casadi.SX(np.zeros(3))
+        A[0] = 2 * (quaternion[0] * quaternion[1]) - (quaternion[3] * quaternion[2])
+        A[1] = 1 - 2 * (quaternion[0]**2 + quaternion[2]**2)
+        A[2] = 2 * (quaternion[1] * quaternion[2]) + (quaternion[3] * quaternion[0])
+        return A
+
     def quatToRotationZ(self, quaternion):
         A = optas.casadi.SX(np.zeros(3))
         A[0] = 2 * (quaternion[0] * quaternion[2]) + (quaternion[3] * quaternion[1])
         A[1] = 2 * (quaternion[1] * quaternion[2]) - (quaternion[3] * quaternion[0])
         A[2] = 1 - 2 * (quaternion[0]**2 + quaternion[1]**2)
         return A
+
+    def qaQb(self, a, b):
+        Quaternion_result = optas.casadi.SX(np.zeros(4))
+        Quaternion_result[0] = a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1]
+        Quaternion_result[1] = a[3] * b[1] + a[1] * b[3] + a[2] * b[0] - a[0] * b[2]
+        Quaternion_result[2] = a[3] * b[2] + a[2] * b[3] + a[0] * b[1] - a[1] * b[0]
+        Quaternion_result[3] = a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2]
+        return Quaternion_result
+
+    def qaConjugateQb_numpy(self, a, b):
+        Quaternion_result = np.zeros(4)
+        Quaternion_result[0] = a[3] * b[0] - a[0] * b[3] - a[1] * b[2] + a[2] * b[1]
+        Quaternion_result[1] = a[3] * b[1] - a[1] * b[3] - a[2] * b[0] + a[0] * b[2]
+        Quaternion_result[2] = a[3] * b[2] - a[2] * b[3] - a[0] * b[1] + a[1] * b[0]
+        Quaternion_result[3] = a[3] * b[3] + a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+        return Quaternion_result
 
 if __name__=="__main__":
     # Initialize node

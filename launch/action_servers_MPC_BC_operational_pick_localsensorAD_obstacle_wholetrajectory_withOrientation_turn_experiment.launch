@@ -3,6 +3,8 @@
 <launch>
     <!-- set global arguments -->
     <arg name="robot_name" default="chonk"/>
+    <param name="robot_description_wholebody" command="$(find xacro)/xacro --inorder '$(find chonk_pushing)/urdf/chonk_pushing_wholebody.urdf'"/>
+
 
     <!-- Spawn position controller -->
     <node
@@ -22,6 +24,7 @@
         type="mux"
         ns="/$(arg robot_name)"
         args="trajectory_controller/command
+            streaming_controller/command
             DefaultPositionController/command
             ActionCmdPosePositionController/command
             ActionCmdConfigPositionController/command
@@ -45,7 +48,7 @@
         name="action_server_cmd_pose_MPC_BC_operational_AD"
         pkg="chonk_pushing"
         ns="/$(arg robot_name)"
-        type="action_server_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_experimentgazebo.py"
+        type="action_server_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation_turn_experiment.py"
         output="screen"
         >
         <param name="link_donkey" type="string" value="link_donkey"/>
@@ -61,6 +64,5 @@
         <remap from="/joint_states" to="/$(arg robot_name)/joint_states"/>
         <remap from="/mux_selected" to="/$(arg robot_name)/mux_joint_position/selected"/>
     </node>
-
 
 </launch>
