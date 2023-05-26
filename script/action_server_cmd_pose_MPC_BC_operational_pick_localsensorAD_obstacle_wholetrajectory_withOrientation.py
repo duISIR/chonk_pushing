@@ -100,7 +100,7 @@ class CmdPoseActionServer(object):
         )
         self.wholebodyMPC_planner_name = self.wholebodyMPC_planner.get_name()
 #        self.dt_MPC_planner = 0.1 # time step
-        self.T_MPC_planner = 10 # T is number of time steps
+        self.T_MPC_planner = 12 # T is number of time steps
 #        self.duration_MPC_planner = float(self.T_MPC_planner-1)*self.dt_MPC_planner
         # nominal robot configuration
         self.wholebodyMPC_planner_opt_idx = self.wholebodyMPC_planner.optimized_joint_indexes
