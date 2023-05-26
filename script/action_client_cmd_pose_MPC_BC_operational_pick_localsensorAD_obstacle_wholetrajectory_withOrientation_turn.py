@@ -379,6 +379,7 @@ if __name__ == '__main__':
         args['duration']
     )
 
+    args['m_box']=0
     args['target_force_R'] = [0, 0, 0]
     args['target_force_L'] = [0, 0, 0]
     args['target_position_R'] = [3.85, -2-0.25, 1.165]
@@ -423,11 +424,13 @@ if __name__ == '__main__':
 
 
 
+
+
     args['target_position_R'] = [0.865, -0.12, 0.92]
-    ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2,    0]).getquat()
+    ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2,    0]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
     args['target_position_L'] = [0.865, 0.12, 0.92]
-    ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi,    np.pi/2,    0]).getquat()
+    ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2,    0]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
     # Initialize node class

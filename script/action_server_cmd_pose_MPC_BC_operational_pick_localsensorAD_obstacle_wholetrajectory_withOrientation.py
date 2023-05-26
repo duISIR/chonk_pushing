@@ -520,14 +520,14 @@ class CmdPoseActionServer(object):
             builder_wholebodyMPC.add_cost_term('Left_arm Force world y' + str(i),  0.1*optas.sumsqr((self.rotation_fnc_Left(init_position_MPC) @ (F_ext_Left_var_MPC[:, i] - F_ext_Left_goal[:, i]))[0:2] - 0.5*m_box * ddpos_box_goal[0:2, i]))
 #            builder_wholebodyMPC.add_cost_term('two Force sum world y' + str(i),   optas.sumsqr(F_ext_Right_var_MPC[1, i] + F_ext_Left_var_MPC[1, i] - F_ext_Right_goal[1, i] - F_ext_Left_goal[1, i] ))
 #            builder_wholebodyMPC.add_cost_term('Two arm ee addition motion equal' + str(i), optas.sumsqr(Delta_p_Right_var_MPC[1, i] + Delta_p_Left_var_MPC[1, i]))
-            builder_wholebodyMPC.add_cost_term('Two force Delta for box inertial force' + str(i),  optas.sumsqr( ((self.rotation_fnc_Right(init_position_MPC) @ F_ext_Right_var_MPC[:, i] + self.rotation_fnc_Left(init_position_MPC) @ F_ext_Left_var_MPC[:, i]))[0:2] - m_box * ddpos_box_goal[0:2, i]))
+#            builder_wholebodyMPC.add_cost_term('Two force Delta for box inertial force' + str(i),  optas.sumsqr( ((self.rotation_fnc_Right(init_position_MPC) @ F_ext_Right_var_MPC[:, i] + self.rotation_fnc_Left(init_position_MPC) @ F_ext_Left_var_MPC[:, i]))[0:2] - m_box * ddpos_box_goal[0:2, i]))
 #            builder_wholebodyMPC.add_bound_inequality_constraint('right_force_limit' + str(i) + '_bound', lhs=-50, mid=F_ext_Right_var_MPC[1, i], rhs=50)
 #            builder_wholebodyMPC.add_bound_inequality_constraint('left_force_limit' + str(i) + '_bound', lhs=-50, mid=F_ext_Left_var_MPC[1, i], rhs=50)
             #####################################################################################
             builder_wholebodyMPC.add_cost_term('twoarm_miniscope' + str(i), 0.1 * optas.sumsqr(q_var_MPC[6, i] + q_var_MPC[12, i]))
             builder_wholebodyMPC.add_cost_term('chest_miniscope' + str(i), 10* optas.sumsqr(q_var_MPC[3, i]))
             builder_wholebodyMPC.add_cost_term('arm_joint_miniscope' + str(i), 0.001 * optas.sumsqr(q_var_MPC[6:self.ndof, i]))
-#            builder_wholebodyMPC.add_cost_term('donkey_yaw_miniscope' + str(i), 0.1 * optas.sumsqr(q_var_MPC[2, i]))
+#            builder_wholebodyMPC.add_cost_term('donkey_yaw_miniscope' + str(i), 0.001 * optas.sumsqr(q_var_MPC[2, i]))
             if(i<(self.T_MPC -1)):
                 builder_wholebodyMPC.add_cost_term('joint_distance' + str(i), 0.05 * optas.sumsqr(Q[:, i+1] - Q[:, i]))
                 builder_wholebodyMPC.add_cost_term('Right_force_distance' + str(i), 0.05 * optas.sumsqr(P_Right[:, i+1] - P_Right[:, i]))
