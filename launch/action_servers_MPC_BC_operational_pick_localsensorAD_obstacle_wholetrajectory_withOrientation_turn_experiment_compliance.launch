@@ -47,7 +47,7 @@
         name="action_server_cmd_pose_MPC_BC_operational_AD"
         pkg="chonk_pushing"
         ns="/$(arg robot_name)"
-        type="action_server_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_experiment_compliance.py"
+        type="action_server_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation_turn_experiment_compliance.py"
         output="screen"
         >
         <param name="link_donkey" type="string" value="link_donkey"/>
