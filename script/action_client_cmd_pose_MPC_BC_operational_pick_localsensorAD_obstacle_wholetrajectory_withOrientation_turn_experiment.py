@@ -114,7 +114,7 @@ if __name__ == '__main__':
         print(T)
         print(box_euler_angle[2])
         print(box_inWorld)
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):k
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
         print("error: cannot find vicon data!!!!")
 #    trans_box = np.zeros(3)
 #    trans_box[0] = 2.336
@@ -143,7 +143,7 @@ if __name__ == '__main__':
         metavar=('QUAT_X','QUAT_Y','QUAT_Z','QUAT_W')
     )
 
-    Right_inbox = np.array([[-1.2], [-0.25], [0], [1]])
+    Right_inbox = np.array([[-1.], [-0.3], [0], [1]])
     Right_inWorld = (T @ Right_inbox)[0:3]
     parser.add_argument('--target_position_R', nargs=3,
         help="Give target position of the robot in meters.",
@@ -167,7 +167,7 @@ if __name__ == '__main__':
         metavar=('torque_X','torque_Y','torque_Z')
     )
     # parse left arm arguments
-    Left_inbox = np.array([[-1.2], [0.25], [0], [1]])
+    Left_inbox = np.array([[-1.], [0.3], [0], [1]])
     Left_inWorld = (T @ Left_inbox)[0:3]
     parser.add_argument('--target_position_L', nargs=3,
         help="Give target position of the robot in meters.",
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     m_box = 0.8
 
     # Initialize node class
-    args['duration']= 5
+    args['duration']= 6
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],
@@ -219,21 +219,21 @@ if __name__ == '__main__':
         args['duration']
     )
 
-    args['duration']= 3
-    cmd_pose_client = CmdPoseClient('client', client,
-        args['m_box'],
-        args['target_position_Donkey'],
-        args['target_orientation_Donkey'],
-        args['target_position_R'],
-        args['target_orientation_R'],
-        args['target_force_R'],
-        args['target_torque_R'],
-        args['target_position_L'],
-        args['target_orientation_L'],
-        args['target_force_L'],
-        args['target_torque_L'],
-        args['duration']
-    )
+#    args['duration']= 3
+#    cmd_pose_client = CmdPoseClient('client', client,
+#        args['m_box'],
+#        args['target_position_Donkey'],
+#        args['target_orientation_Donkey'],
+#        args['target_position_R'],
+#        args['target_orientation_R'],
+#        args['target_force_R'],
+#        args['target_torque_R'],
+#        args['target_position_L'],
+#        args['target_orientation_L'],
+#        args['target_force_L'],
+#        args['target_torque_L'],
+#        args['duration']
+#    )
     # execute node
 #    rospy.spin()
 
@@ -242,9 +242,32 @@ if __name__ == '__main__':
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2 - np.pi/3,    box_euler_angle[2]]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
-    Right_inbox = np.array([[0], [-0.25], [0], [1]])
+    Right_inbox = np.array([[0.1], [-0.3], [0], [1]])
     Right_inWorld = (T @ Right_inbox)[0:3]
-    Left_inbox = np.array([[0], [0.25], [0], [1]])
+    Left_inbox = np.array([[0.1], [0.3], [0], [1]])
+    Left_inWorld = (T @ Left_inbox)[0:3]
+    args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
+    args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
+
+    # Initialize node class
+    args['duration']=5.0
+    cmd_pose_client = CmdPoseClient('client', client,
+        args['m_box'],
+        args['target_position_Donkey'],
+        args['target_orientation_Donkey'],
+        args['target_position_R'],
+        args['target_orientation_R'],
+        args['target_force_R'],
+        args['target_torque_R'],
+        args['target_position_L'],
+        args['target_orientation_L'],
+        args['target_force_L'],
+        args['target_torque_L'],
+        args['duration']
+    )
+    Right_inbox = np.array([[0.1], [-0.135], [0], [1]])
+    Right_inWorld = (T @ Right_inbox)[0:3]
+    Left_inbox = np.array([[0.1], [0.135], [0], [1]])
     Left_inWorld = (T @ Left_inbox)[0:3]
     args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
     args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
@@ -265,15 +288,16 @@ if __name__ == '__main__':
         args['target_torque_L'],
         args['duration']
     )
-    Right_inbox = np.array([[0], [-0.135], [0], [1]])
+
+    Right_inbox = np.array([[0.1], [-0.135], [0], [1]])
     Right_inWorld = (T @ Right_inbox)[0:3]
-    Left_inbox = np.array([[0], [0.135], [0], [1]])
+    Left_inbox = np.array([[0.1], [0.135], [0], [1]])
     Left_inWorld = (T @ Left_inbox)[0:3]
     args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
     args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
 
     # Initialize node class
-    args['duration']=4.0
+    args['duration']=6.0
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],
@@ -296,7 +320,7 @@ if __name__ == '__main__':
     args['target_position_L'] = [Left_inWorld[0],  Left_inWorld[1],  trans_box[2]]
 
     # Initialize node class
-    args['duration']=4.0
+    args['duration']=5.0
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],
@@ -344,7 +368,7 @@ if __name__ == '__main__':
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2 - np.pi/3,    0]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
-    args['duration']=7
+    args['duration']=8
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],
@@ -369,7 +393,7 @@ if __name__ == '__main__':
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2 - np.pi/3,    0]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
-    args['duration']=3
+    args['duration']=5
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],
@@ -470,7 +494,7 @@ if __name__ == '__main__':
     args['target_position_R'] = [5, -0.405-0.25, trans_box[2]-0.04]
     args['target_position_L'] = [5, -0.405+0.25, trans_box[2]-0.04]
     # Initialize node class
-    args['duration']=3
+    args['duration']=4
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],
@@ -488,14 +512,14 @@ if __name__ == '__main__':
 
 
 
-    args['target_position_R'] = [0.865, -0.12, 1.0]
+    args['target_position_R'] = [0.865, -0.405-0.12, 1.0]
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2,    0]).getquat()
     args['target_orientation_R'] = [ori_R[0], ori_R[1], ori_R[2], ori_R[3]]
-    args['target_position_L'] = [0.865, +0.12, 1.0]
+    args['target_position_L'] = [0.865, -0.405+0.12, 1.0]
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2,    0]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
-    args['duration']=6.0
+    args['duration']=8.0
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],

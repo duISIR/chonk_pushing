@@ -181,6 +181,11 @@ class CmdPoseActionServer(object):
             builder_wholebodyMPC_planner.add_cost_term('Two_arm end height same' + str(i), optas.sumsqr(R_pos_Right[2, i] - R_pos_Left[2, i]))
 #            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align' + str(i), optas.sumsqr( self.skew_optas(self.quatToRotationZ(R_ori_Right[:, i])) @ (R_pos_Right[:, i] - R_pos_Left[:, i])   ))
 #            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align' + str(i), optas.sumsqr( self.skew_optas(self.quatToRotationZ(R_ori_Left[:, i])) @ (R_pos_Right[:, i] - R_pos_Left[:, i])   ))
+            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_x' + str(i), 20*optas.sumsqr( self.quatToRotationX(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_y' + str(i), 5*optas.sumsqr( self.quatToRotationY(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+
+            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align_x' + str(i), 20*optas.sumsqr( self.quatToRotationX(r_ori_LARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align_y' + str(i), 5*optas.sumsqr( self.quatToRotationY(r_ori_LARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
 
 
             builder_wholebodyMPC_planner.add_cost_term('Two_arm orientation parallel' + str(i), 20*optas.sumsqr(R_ori_Right[:, i] -  self.qaQb( R_ori_Left[:, i], quaternion_fixed180 )))

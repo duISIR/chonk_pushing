@@ -231,7 +231,7 @@
       <pose>2.3 2.67 1.165 0 -0 0</pose>
       <link name='link'>
         <inertial>
-          <mass>1.2</mass>
+          <mass>0.5</mass>
           <inertia>
             <ixx>0.166667</ixx>
             <ixy>0</ixy>
@@ -685,7 +685,7 @@
 </model>-->
 
 <model name='unit_cylinder'>
-  <pose>4.37 1.63 1 0 -0 0</pose>
+  <pose>4.67 1.63 1 0 -0 0</pose>
   <link name='link'>
     <inertial>
       <mass>1000</mass>

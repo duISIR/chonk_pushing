@@ -182,12 +182,17 @@ class CmdPoseActionServer(object):
 #            builder_wholebodyMPC_planner.add_leq_inequality_constraint('quaternion_equality_left' + str(i),  lhs=optas.sumsqr(R_ori_Left[:, i]), rhs=1. + r_ori_ep[1, i])
             builder_wholebodyMPC_planner.add_equality_constraint('quaternion_equality_right' + str(i),  lhs=optas.sumsqr(R_ori_Right[:, i]), rhs=1.)
             builder_wholebodyMPC_planner.add_equality_constraint('quaternion_equality_left' + str(i),  lhs=optas.sumsqr(R_ori_Left[:, i]), rhs=1.)
-            builder_wholebodyMPC_planner.add_cost_term('Two_arm orientation parallel' + str(i), 20*optas.sumsqr(R_ori_Right[:, i] -  self.qaQb( R_ori_Left[:, i], quaternion_fixed180 )))
+#            builder_wholebodyMPC_planner.add_cost_term('Two_arm orientation parallel' + str(i), 20*optas.sumsqr(R_ori_Right[:, i] -  self.qaQb( R_ori_Left[:, i], quaternion_fixed180 )))
             builder_wholebodyMPC_planner.add_cost_term('Two_arm end height same' + str(i), optas.sumsqr(R_pos_Right[2, i] - R_pos_Left[2, i]))
 #            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align' + str(i), 5*optas.sumsqr( self.skew_optas(self.quatToRotationZ(r_ori_RARM_var_MPC[:, i])) @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
 #            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align' + str(i), 5*optas.sumsqr( self.skew_optas(self.quatToRotationZ(r_ori_LARM_var_MPC[:, i])) @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
-            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_x' + str(i), 50*optas.sumsqr( self.quatToRotationX(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+#            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_x' + str(i), 50*optas.sumsqr( self.quatToRotationX(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+#            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_y' + str(i), 5*optas.sumsqr( self.quatToRotationY(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_x' + str(i), 20*optas.sumsqr( self.quatToRotationX(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
             builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_y' + str(i), 5*optas.sumsqr( self.quatToRotationY(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+
+            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align_x' + str(i), 20*optas.sumsqr( self.quatToRotationX(r_ori_LARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
+            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align_y' + str(i), 5*optas.sumsqr( self.quatToRotationY(r_ori_LARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
 
 #            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align_x' + str(i), 50*optas.sumsqr( self.quatToRotationX(r_ori_LARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
 
@@ -217,8 +222,8 @@ class CmdPoseActionServer(object):
 
 
         for i in range(self.T_MPC_planner):
-            obstacle_pos = np.asarray([[4.67], [1.63-0.83]])
-            obstacle_radius = 0.8
+            obstacle_pos = np.asarray([[4.45], [1.15]])
+            obstacle_radius = 0.9
 #            builder_wholebodyMPC_planner.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2 + r_ep[i])
             builder_wholebodyMPC_planner.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2)
 
@@ -352,7 +357,7 @@ class CmdPoseActionServer(object):
                                                                                                        'print_time': 0,
 #                                                                                                       'knitro.par_msnumthreads': 14,
                                                                                                        'knitro.act_qpalg': 1,
-                                                                                                       'knitro.FeasTol': 5e-4, 'knitro.OptTol': 5e-4, 'knitro.ftol':5e-4,
+                                                                                                       'knitro.FeasTol': 1e-4, 'knitro.OptTol': 1e-4, 'knitro.ftol':1e-4,
                                                                                                        'knitro.algorithm':3, 'knitro.linsolver':2,
 #                                                                                                       'knitro.maxtime_real': 4.0e-3,
                                                                                                        'knitro.bar_initpt':3, 'knitro.bar_murule':4, 'knitro.bar_penaltycons': 1,
@@ -956,9 +961,9 @@ class CmdPoseActionServer(object):
                     self.ddq_next += (1./self.duration_MPC)**2 * self.BC(n-2, j) * t**j * (1-t)**(n-2-j) * n * (n-1)* (Q[:, j+2] -  2*Q[:, j+1] + Q[:, j])
 
                 # read current robot joint positions
-                self.q_curr = np.concatenate((self.q_curr_base, self.q_curr_joint), axis=None)
-                self.Derivation_RARM_pos_start[1] = np.asarray(self.pos_fnc_Right(self.q_next)).T[0][1] - np.asarray(self.pos_fnc_Right(self.q_curr)).T[0][1]
-                self.Derivation_LARM_pos_start[1] = np.asarray(self.pos_fnc_Left(self.q_next)).T[0][1] - np.asarray(self.pos_fnc_Left(self.q_curr)).T[0][1]
+#                self.q_curr = np.concatenate((self.q_curr_base, self.q_curr_joint), axis=None)
+#                self.Derivation_RARM_pos_start[1] = np.asarray(self.pos_fnc_Right(self.q_next)).T[0][1] - np.asarray(self.pos_fnc_Right(self.q_curr)).T[0][1]
+#                self.Derivation_LARM_pos_start[1] = np.asarray(self.pos_fnc_Left(self.q_next)).T[0][1] - np.asarray(self.pos_fnc_Left(self.q_curr)).T[0][1]
 
 #                print('r')
 #                print(self.qaConjugateQb_numpy(self.ori_fnc_Left(self.q_curr), self.ori_fnc_Right(self.q_curr)))
@@ -1098,21 +1103,21 @@ class CmdPoseActionServer(object):
     def quatToRotationX(self, quaternion):
         A = optas.casadi.SX(np.zeros(3))
         A[0] = 1 - 2 * (quaternion[1]**2 + quaternion[2]**2)
-        A[1] = 2 * (quaternion[0] * quaternion[1]) + (quaternion[3] * quaternion[2])
-        A[2] = 2 * (quaternion[0] * quaternion[2]) - (quaternion[3] * quaternion[1])
+        A[1] = 2 * (quaternion[0] * quaternion[1] + quaternion[3] * quaternion[2])
+        A[2] = 2 * (quaternion[0] * quaternion[2] - quaternion[3] * quaternion[1])
         return A
 
     def quatToRotationY(self, quaternion):
         A = optas.casadi.SX(np.zeros(3))
-        A[0] = 2 * (quaternion[0] * quaternion[1]) - (quaternion[3] * quaternion[2])
+        A[0] = 2 * (quaternion[0] * quaternion[1] - quaternion[3] * quaternion[2])
         A[1] = 1 - 2 * (quaternion[0]**2 + quaternion[2]**2)
-        A[2] = 2 * (quaternion[1] * quaternion[2]) + (quaternion[3] * quaternion[0])
+        A[2] = 2 * (quaternion[1] * quaternion[2] + quaternion[3] * quaternion[0])
         return A
 
     def quatToRotationZ(self, quaternion):
         A = optas.casadi.SX(np.zeros(3))
-        A[0] = 2 * (quaternion[0] * quaternion[2]) + (quaternion[3] * quaternion[1])
-        A[1] = 2 * (quaternion[1] * quaternion[2]) - (quaternion[3] * quaternion[0])
+        A[0] = 2 * (quaternion[0] * quaternion[2] + quaternion[3] * quaternion[1])
+        A[1] = 2 * (quaternion[1] * quaternion[2] - quaternion[3] * quaternion[0])
         A[2] = 1 - 2 * (quaternion[0]**2 + quaternion[1]**2)
         return A
 

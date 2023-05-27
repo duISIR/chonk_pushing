@@ -1,15 +1,9 @@
 digraph G {
 node [shape=box];
 "base_link" [label="base_link"];
+"donkey_pre1" [label="donkey_pre1"];
+"donkey_pre2" [label="donkey_pre2"];
 "donkey_base" [label="donkey_base"];
-"fl_wheel_link" [label="fl_wheel_link"];
-"fl_wheel_link_passive" [label="fl_wheel_link_passive"];
-"fr_wheel_link" [label="fr_wheel_link"];
-"fr_wheel_link_passive" [label="fr_wheel_link_passive"];
-"rl_wheel_link" [label="rl_wheel_link"];
-"rl_wheel_link_passive" [label="rl_wheel_link_passive"];
-"rr_wheel_link" [label="rr_wheel_link"];
-"rr_wheel_link_passive" [label="rr_wheel_link_passive"];
 "WAIST" [label="WAIST"];
 "CHEST_JOINT0_Link" [label="CHEST_JOINT0_Link"];
 "HEAD_JOINT0_Link" [label="HEAD_JOINT0_Link"];
@@ -60,27 +54,16 @@ node [shape=box];
 "gaze_ref" [label="gaze_ref"];
 "RARM_END_EFFECTOR_grasp" [label="RARM_END_EFFECTOR_grasp"];
 "RARM_END_EFFECTOR_grasp_end" [label="RARM_END_EFFECTOR_grasp_end"];
+"link_donkey" [label="link_donkey"];
 "teleop_ref" [label="teleop_ref"];
 node [shape=ellipse, color=blue, fontcolor=blue];
-"base_link" -> "donkey_base_link_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
-"donkey_base_link_joint" -> "donkey_base"
-"donkey_base" -> "fl_wheel_joint" [label="xyz: 0.36 0.25 0.095 \nrpy: 0 -0 0"]
-"fl_wheel_joint" -> "fl_wheel_link"
-"fl_wheel_link" -> "fl_wheel_link_passive_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
-"fl_wheel_link_passive_joint" -> "fl_wheel_link_passive"
-"donkey_base" -> "fr_wheel_joint" [label="xyz: 0.36 -0.25 0.095 \nrpy: 0 -0 0"]
-"fr_wheel_joint" -> "fr_wheel_link"
-"fr_wheel_link" -> "fr_wheel_link_passive_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
-"fr_wheel_link_passive_joint" -> "fr_wheel_link_passive"
-"donkey_base" -> "rl_wheel_joint" [label="xyz: -0.36 0.25 0.095 \nrpy: 0 -0 0"]
-"rl_wheel_joint" -> "rl_wheel_link"
-"rl_wheel_link" -> "rl_wheel_link_passive_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
-"rl_wheel_link_passive_joint" -> "rl_wheel_link_passive"
-"donkey_base" -> "rr_wheel_joint" [label="xyz: -0.36 -0.25 0.095 \nrpy: 0 -0 0"]
-"rr_wheel_joint" -> "rr_wheel_link"
-"rr_wheel_link" -> "rr_wheel_link_passive_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
-"rr_wheel_link_passive_joint" -> "rr_wheel_link_passive"
-"base_link" -> "donkey_base_mount_joint" [label="xyz: 0.422 0 0.855 \nrpy: 0 -0 0"]
+"base_link" -> "base_joint_1" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_joint_1" -> "donkey_pre1"
+"donkey_pre1" -> "base_joint_2" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_joint_2" -> "donkey_pre2"
+"donkey_pre2" -> "base_joint_3" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_joint_3" -> "donkey_base"
+"donkey_base" -> "donkey_base_mount_joint" [label="xyz: 0.422 0 0.855 \nrpy: 0 -0 0"]
 "donkey_base_mount_joint" -> "WAIST"
 "WAIST" -> "CHEST_JOINT0" [label="xyz: 0 0 0.267 \nrpy: 0 -0 0"]
 "CHEST_JOINT0" -> "CHEST_JOINT0_Link"
@@ -180,6 +163,8 @@ node [shape=ellipse, color=blue, fontcolor=blue];
 "RARM_ARM_eeff_grasp" -> "RARM_END_EFFECTOR_grasp"
 "RARM_END_EFFECTOR_grasp" -> "RARM_ARM_eeff_grasp_end" [label="xyz: 0.045 0 0 \nrpy: 0 -0 0"]
 "RARM_ARM_eeff_grasp_end" -> "RARM_END_EFFECTOR_grasp_end"
+"donkey_base" -> "link_donkey_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"link_donkey_joint" -> "link_donkey"
 "base_link" -> "teleop_ref_joint" [label="xyz: 0.3 0 0 \nrpy: 3.14159 -0 0"]
 "teleop_ref_joint" -> "teleop_ref"
 }
