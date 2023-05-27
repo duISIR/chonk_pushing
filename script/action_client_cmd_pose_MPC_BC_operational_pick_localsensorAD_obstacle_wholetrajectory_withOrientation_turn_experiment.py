@@ -114,7 +114,7 @@ if __name__ == '__main__':
         print(T)
         print(box_euler_angle[2])
         print(box_inWorld)
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):k
         print("error: cannot find vicon data!!!!")
 #    trans_box = np.zeros(3)
 #    trans_box[0] = 2.336
