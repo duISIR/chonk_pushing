@@ -179,7 +179,7 @@ class CmdPoseActionServer(object):
             builder_wholebodyMPC_planner.add_equality_constraint('quaternion_equality_right' + str(i),  lhs=optas.sumsqr(R_ori_Right[:, i]), rhs=1.)
             builder_wholebodyMPC_planner.add_equality_constraint('quaternion_equality_left' + str(i),  lhs=optas.sumsqr(R_ori_Left[:, i]), rhs=1.)
 #            builder_wholebodyMPC_planner.add_cost_term('Two_arm orientation parallel' + str(i), optas.sumsqr(R_ori_Right[:, i].T @ R_ori_Left[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('Two_arm end height same' + str(i), optas.sumsqr(R_pos_Right[2, i] - R_pos_Left[2, i]))
+            builder_wholebodyMPC_planner.add_cost_term('Two_arm end height same' + str(i), optas.sumsqr(r_pos_RARM_var_MPC[2, i] - r_pos_LARM_var_MPC[2, i]))
 #            builder_wholebodyMPC_planner.add_cost_term('Right_arm_align' + str(i), optas.sumsqr( self.skew_optas(self.quatToRotationZ(R_ori_Right[:, i])) @ (R_pos_Right[:, i] - R_pos_Left[:, i])   ))
 #            builder_wholebodyMPC_planner.add_cost_term('Left_arm_align' + str(i), optas.sumsqr( self.skew_optas(self.quatToRotationZ(R_ori_Left[:, i])) @ (R_pos_Right[:, i] - R_pos_Left[:, i])   ))
             builder_wholebodyMPC_planner.add_cost_term('Right_arm_align_x' + str(i), 20*optas.sumsqr( self.quatToRotationX(r_ori_RARM_var_MPC[:, i]).T @ (r_pos_RARM_var_MPC[:, i] - r_pos_LARM_var_MPC[:, i])   ))
@@ -1065,12 +1065,45 @@ class CmdPoseActionServer(object):
 #        A[3,0] = -quaternion[0]; A[3,1] = -quaternion[1]; A[3,2] = -quaternion[2];
         return A
 
+    def quatToRotationX(self, quaternion):
+        A = optas.casadi.SX(np.zeros(3))
+        A[0] = 1 - 2 * (quaternion[1]**2 + quaternion[2]**2)
+        A[1] = 2 * (quaternion[0] * quaternion[1] + quaternion[3] * quaternion[2])
+        A[2] = 2 * (quaternion[0] * quaternion[2] - quaternion[3] * quaternion[1])
+        return A
+
+    def quatToRotationY(self, quaternion):
+        A = optas.casadi.SX(np.zeros(3))
+        A[0] = 2 * (quaternion[0] * quaternion[1] - quaternion[3] * quaternion[2])
+        A[1] = 1 - 2 * (quaternion[0]**2 + quaternion[2]**2)
+        A[2] = 2 * (quaternion[1] * quaternion[2] + quaternion[3] * quaternion[0])
+        return A
+
     def quatToRotationZ(self, quaternion):
         A = optas.casadi.SX(np.zeros(3))
-        A[0] = 2 * (quaternion[0] * quaternion[2]) + (quaternion[3] * quaternion[1])
-        A[1] = 2 * (quaternion[1] * quaternion[2]) - (quaternion[3] * quaternion[0])
+        A[0] = 2 * (quaternion[0] * quaternion[2] + quaternion[3] * quaternion[1])
+        A[1] = 2 * (quaternion[1] * quaternion[2] - quaternion[3] * quaternion[0])
         A[2] = 1 - 2 * (quaternion[0]**2 + quaternion[1]**2)
         return A
+
+    def qaQb(self, a, b):
+        Quaternion_result = optas.casadi.SX(np.zeros(4))
+        Quaternion_result[0] = a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1]
+        Quaternion_result[1] = a[3] * b[1] + a[1] * b[3] + a[2] * b[0] - a[0] * b[2]
+        Quaternion_result[2] = a[3] * b[2] + a[2] * b[3] + a[0] * b[1] - a[1] * b[0]
+        Quaternion_result[3] = a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2]
+        return Quaternion_result
+
+    def qaConjugateQb_numpy(self, a, b):
+        Quaternion_result = np.zeros(4)
+        Quaternion_result[0] = a[3] * b[0] - a[0] * b[3] - a[1] * b[2] + a[2] * b[1]
+        Quaternion_result[1] = a[3] * b[1] - a[1] * b[3] - a[2] * b[0] + a[0] * b[2]
+        Quaternion_result[2] = a[3] * b[2] - a[2] * b[3] - a[0] * b[1] + a[1] * b[0]
+        Quaternion_result[3] = a[3] * b[3] + a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+        return Quaternion_result
+        
+        
 
 if __name__=="__main__":
     # Initialize node
