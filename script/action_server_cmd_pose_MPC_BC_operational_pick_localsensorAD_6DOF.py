@@ -374,7 +374,7 @@ class CmdPoseActionServer(object):
 
         #########################################################################################
         # setup solver
-        self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro')
+#        self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro')
         solver_options = {'knitro.OutLev': 0,
 #                          'print_time': 0,
                           'knitro.FeasTol': 5e-5, 'knitro.OptTol': 5e-5,'knitro.ftol':5e-5,
