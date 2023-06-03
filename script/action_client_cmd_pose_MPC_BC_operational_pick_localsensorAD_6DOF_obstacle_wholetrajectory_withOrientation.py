@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--target_position_R', nargs=3,
         help="Give target position of the robot in meters.",
-        type=float, default=[2, 2-0.22, 1.165],
+        type=float, default=[3, 2-0.22, 1.165],
         metavar=('POS_X', 'POS_Y', 'POS_Z')
     )
     ori_R = optas.spatialmath.Quaternion.fromrpy([np.pi+np.pi/2,    np.pi/2 - np.pi/3,    0]).getquat()
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     # parse left arm arguments
     parser.add_argument('--target_position_L', nargs=3,
         help="Give target position of the robot in meters.",
-        type=float, default=[2, 2+0.22, 1.165],
+        type=float, default=[3, 2+0.22, 1.165],
         metavar=('POS_X', 'POS_Y', 'POS_Z')
     )
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     rospy.init_node('cmd_pose_client_MPC_BC_operational_pick', anonymous=True)
     client = actionlib.SimpleActionClient('/chonk/cmd_pose', CmdChonkPoseForceAction)
 
-    force = 30
+    force = 20
     m_box = 1.2
 
     # Initialize node class

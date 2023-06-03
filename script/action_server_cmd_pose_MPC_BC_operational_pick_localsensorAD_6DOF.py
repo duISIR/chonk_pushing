@@ -160,7 +160,7 @@ class CmdPoseActionServer(object):
         self.K_Left = np.diag([stiffness, stiffness, stiffness]) # Stiffness Left
         self.D_Right = np.diag([2 * np.sqrt(self.m_ee_r*self.K_Right[0,0]), 2 * np.sqrt(self.m_ee_r*self.K_Right[1,1]), 2 * np.sqrt(self.m_ee_r*self.K_Right[2,2])]) # Damping Right
         self.D_Left = np.diag([2 * np.sqrt(self.m_ee_l*self.K_Left[0,0]), 2 * np.sqrt(self.m_ee_l*self.K_Left[1,1]), 2 * np.sqrt(self.m_ee_l*self.K_Left[2,2])]) # Damping Left
-        stiffness_phi = 5000;
+        stiffness_phi = 500;
         self.K_phi_Right = np.diag([stiffness_phi, stiffness_phi, stiffness_phi]) # Stiffness Right
         self.K_phi_Left = np.diag([stiffness_phi, stiffness_phi, stiffness_phi]) # Stiffness Left
         self.D_phi_Right = np.diag([2 * np.sqrt(self.K_phi_Right[0,0]), 2 * np.sqrt(self.K_phi_Right[1,1]), 2 * np.sqrt(self.K_phi_Right[2,2])]) # Damping Right
@@ -266,10 +266,10 @@ class CmdPoseActionServer(object):
         for i in range(self.T_MPC):
             for j in range(self.T_MPC):
                 q_var_MPC[:, i] += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * Q[:, j]
-                Delta_p_Right_var_MPC += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * P_Right[:, j]
-                Delta_p_Left_var_MPC += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * P_Left[:, j]
-                Delta_phi_Right_var_MPC += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * Phi_Right[:, j]
-                Delta_phi_Left_var_MPC += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * Phi_Left[:, j]
+                Delta_p_Right_var_MPC[:, i] += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * P_Right[:, j]
+                Delta_p_Left_var_MPC[:, i] += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * P_Left[:, j]
+                Delta_phi_Right_var_MPC[:, i] += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * Phi_Right[:, j]
+                Delta_phi_Left_var_MPC[:, i] += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * Phi_Left[:, j]
             for j in range(self.T_MPC-1):
                 dDelta_p_Right_var_MPC[:, i] += (1./self.duration_MPC) * self.BC(self.n-1, j) * t[i]**j * (1-t[i])**(self.n-1-j) * self.n * (P_Right[:, j+1] -  P_Right[:, j])
                 dDelta_p_Left_var_MPC[:, i] += (1./self.duration_MPC) * self.BC(self.n-1, j) * t[i]**j * (1-t[i])**(self.n-1-j) * self.n * (P_Left[:, j+1] -  P_Left[:, j])
@@ -301,8 +301,8 @@ class CmdPoseActionServer(object):
 #            builder_wholebodyMPC.add_cost_term('Right_arm orientation' + str(i), optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i])-ori_R[:, i]))
 #            builder_wholebodyMPC.add_cost_term('Left_arm orientation' + str(i), optas.sumsqr(self.ori_fnc_Left(q_var_MPC[:, i])-ori_L[:, i]))
 
-            builder_wholebodyMPC.add_cost_term('Right_arm orientation' + str(i), optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i])- self.qaQb(Delta_quaternion_Right_var_MPC, self.qaQb(init_Delta_orientation_Right, ori_R[:, i] ) )  ))
-            builder_wholebodyMPC.add_cost_term('Left_arm orientation' + str(i),  optas.sumsqr(self.ori_fnc_Left(q_var_MPC[:, i])- self.qaQb(Delta_quaternion_Left_var_MPC, self.qaQb(init_Delta_orientation_Left, ori_L[:, i] ) ) ))
+            builder_wholebodyMPC.add_cost_term('Right_arm orientation' + str(i), optas.sumsqr(self.ori_fnc_Right(q_var_MPC[:, i])- self.qaQb(Delta_quaternion_Right_var_MPC[:, i], self.qaQb(init_Delta_orientation_Right, ori_R[:, i] ) )  ))
+            builder_wholebodyMPC.add_cost_term('Left_arm orientation' + str(i),  optas.sumsqr(self.ori_fnc_Left(q_var_MPC[:, i])- self.qaQb(Delta_quaternion_Left_var_MPC[:, i], self.qaQb(init_Delta_orientation_Left, ori_L[:, i] ) ) ))
             builder_wholebodyMPC.add_cost_term('Right_arm position AD' + str(i), optas.sumsqr(self.pos_fnc_Right(q_var_MPC[:, i])-pos_R[:, i] - init_Delta_position_Right - self.rotation_fnc_Right(init_position_MPC) @ Delta_p_Right_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('Left_arm position AD' + str(i),  optas.sumsqr(self.pos_fnc_Left(q_var_MPC[:, i])-pos_L[:, i]  - init_Delta_position_Left  - self.rotation_fnc_Left(init_position_MPC) @ Delta_p_Left_var_MPC[:, i]))
             #####################################################################################

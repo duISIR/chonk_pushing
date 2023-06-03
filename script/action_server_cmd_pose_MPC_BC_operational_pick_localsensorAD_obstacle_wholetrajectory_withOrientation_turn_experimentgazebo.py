@@ -498,8 +498,8 @@ class CmdPoseActionServer(object):
         for i in range(self.T_MPC):
             for j in range(self.T_MPC):
                 q_var_MPC[:, i] += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * Q[:, j]
-                Delta_p_Right_var_MPC += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * P_Right[:, j]
-                Delta_p_Left_var_MPC += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * P_Left[:, j]
+                Delta_p_Right_var_MPC[:, i] += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * P_Right[:, j]
+                Delta_p_Left_var_MPC[:, i] += self.BC(self.n, j) * t[i]**j * (1-t[i])**(self.n-j) * P_Left[:, j]
             for j in range(self.T_MPC-1):
                 dDelta_p_Right_var_MPC[:, i] += (1./self.duration_MPC) * self.BC(self.n-1, j) * t[i]**j * (1-t[i])**(self.n-1-j) * self.n * (P_Right[:, j+1] -  P_Right[:, j])
                 dDelta_p_Left_var_MPC[:, i] += (1./self.duration_MPC) * self.BC(self.n-1, j) * t[i]**j * (1-t[i])**(self.n-1-j) * self.n * (P_Left[:, j+1] -  P_Left[:, j])
@@ -553,6 +553,8 @@ class CmdPoseActionServer(object):
         builder_wholebodyMPC.add_equality_constraint('Delta_p_Left_var_MPC_non_motion_direction_z', P_Left[1, :], rhs=np.zeros((1, self.T_MPC)))
         builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Right_constraint_y', P_Right[2, 0], rhs = 0 )
         builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Left_constraint_y',  P_Left[2, 0],  rhs = 0 )
+#        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Right_constraint_y', P_Right[:, 0], rhs = np.zeros(3) )
+#        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Left_constraint_y',  P_Left[:, 0],  rhs = np.zeros(3) )
         #########################################################################################
         dq_var_MPC = optas.casadi.SX(np.zeros((self.ndof, self.T_MPC)))
         w_dq = self.duration_MPC**2 * 0.05/float(self.T_MPC)

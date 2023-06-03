@@ -111,9 +111,9 @@ if __name__ == '__main__':
         box_Rotation = optas.spatialmath.rotz(box_euler_angle[2])
         box_inWorld = np.array([[trans_box[0]], [trans_box[1]], [trans_box[2]]])
         T = optas.spatialmath.rt2tr(box_Rotation, box_inWorld)
-        print(T)
-        print(box_euler_angle[2])
-        print(box_inWorld)
+#        print(T)
+#        print(box_euler_angle[2])
+#        print(box_inWorld)
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
         print("error: cannot find vicon data!!!!")
 #    trans_box = np.zeros(3)
