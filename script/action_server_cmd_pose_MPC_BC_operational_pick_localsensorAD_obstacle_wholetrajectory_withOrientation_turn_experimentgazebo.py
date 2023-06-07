@@ -97,7 +97,7 @@ class CmdPoseActionServer(object):
             urdf_string=self._robot_description,
             time_derivs=[0],
             param_joints=['base_joint_1', 'base_joint_2', 'base_joint_3', 'CHEST_JOINT0', 'HEAD_JOINT0', 'HEAD_JOINT1', 'LARM_JOINT0', 'LARM_JOINT1', 'LARM_JOINT2', 'LARM_JOINT3', 'LARM_JOINT4', 'LARM_JOINT5', 'RARM_JOINT0', 'RARM_JOINT1', 'RARM_JOINT2', 'RARM_JOINT3', 'RARM_JOINT4', 'RARM_JOINT5'],
-            name='chonk_wholebodyMPC'
+            name='chonk_wholebodyMPC_planner'
         )
         self.wholebodyMPC_planner_name = self.wholebodyMPC_planner.get_name()
 #        self.dt_MPC_planner = 0.1 # time step
@@ -347,7 +347,7 @@ class CmdPoseActionServer(object):
 
         # setup solver
         self.solver_wholebodyMPC_planner = optas.CasADiSolver(optimization=builder_wholebodyMPC_planner.build()).setup('knitro', solver_options={
-#                                                                                                       'knitro.OutLev': 0,
+                                                                                                       'knitro.OutLev': 0,
                                                                                                        'print_time': 0,
 #                                                                                                       'knitro.par_msnumthreads': 14,
                                                                                                        'knitro.act_qpalg': 1,
@@ -402,7 +402,7 @@ class CmdPoseActionServer(object):
 
         self.m_ee_r = 0.3113;
         self.m_ee_l = 0.3113;
-        stiffness = 1500;
+        stiffness = 1000;
 
         inertia_Right = builder_wholebodyMPC.add_parameter('inertia_Right', 3, 3)  # inertia Right parameter
         inertia_Left = builder_wholebodyMPC.add_parameter('inertia_Left', 3, 3)  # inertia Left parameter
@@ -763,6 +763,9 @@ class CmdPoseActionServer(object):
                 r_pos_actual_Left = np.array(self.pos_fnc_Left_planner(self.q_curr))[0:3]
                 dr_pos_actual_Right = np.asarray(self.pos_Jac_fnc_Right_planner(self.q_curr)) @ self.dq_curr
                 dr_pos_actual_Left = np.asarray(self.pos_Jac_fnc_Left_planner(self.q_curr)) @ self.dq_curr
+
+#                print(dr_pos_actual_Right)
+#                print(dr_pos_actual_Left)
 
                 r_ori_actual_Right = np.array(self.ori_fnc_Right_planner(self.q_curr))[0:4]
                 r_ori_actual_Left = np.array(self.ori_fnc_Left_planner(self.q_curr))[0:4]

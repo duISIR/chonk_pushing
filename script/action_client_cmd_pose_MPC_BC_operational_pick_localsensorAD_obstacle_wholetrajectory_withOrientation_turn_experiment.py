@@ -106,7 +106,7 @@ if __name__ == '__main__':
     # read current robot joint positions
     try:
         (trans_box,rot_box) = tf_listener.lookupTransform('/vicon/world', '/vicon/eva_box/eva_box',  rospy.Time(0))
-        trans_box[2] += 0.1
+        trans_box[2] += 0.15
         box_euler_angle = tf.transformations.euler_from_quaternion([rot_box[0], rot_box[1], rot_box[2], rot_box[3]])
         box_Rotation = optas.spatialmath.rotz(box_euler_angle[2])
         box_inWorld = np.array([[trans_box[0]], [trans_box[1]], [trans_box[2]]])
@@ -273,7 +273,7 @@ if __name__ == '__main__':
     args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
 
     # Initialize node class
-    args['duration']=6.0
+    args['duration']=4.0
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],
@@ -289,29 +289,29 @@ if __name__ == '__main__':
         args['duration']
     )
 
-#    Right_inbox = np.array([[0], [-0.135], [0], [1]])
-#    Right_inWorld = (T @ Right_inbox)[0:3]
-#    Left_inbox = np.array([[0], [0.135], [0], [1]])
-#    Left_inWorld = (T @ Left_inbox)[0:3]
-#    args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
-#    args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
+    Right_inbox = np.array([[0], [-0.135], [0], [1]])
+    Right_inWorld = (T @ Right_inbox)[0:3]
+    Left_inbox = np.array([[0], [0.135], [0], [1]])
+    Left_inWorld = (T @ Left_inbox)[0:3]
+    args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
+    args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
 
-#    # Initialize node class
-#    args['duration']=6.0
-#    cmd_pose_client = CmdPoseClient('client', client,
-#        args['m_box'],
-#        args['target_position_Donkey'],
-#        args['target_orientation_Donkey'],
-#        args['target_position_R'],
-#        args['target_orientation_R'],
-#        args['target_force_R'],
-#        args['target_torque_R'],
-#        args['target_position_L'],
-#        args['target_orientation_L'],
-#        args['target_force_L'],
-#        args['target_torque_L'],
-#        args['duration']
-#    )
+    # Initialize node class
+    args['duration']=4.0
+    cmd_pose_client = CmdPoseClient('client', client,
+        args['m_box'],
+        args['target_position_Donkey'],
+        args['target_orientation_Donkey'],
+        args['target_position_R'],
+        args['target_orientation_R'],
+        args['target_force_R'],
+        args['target_torque_R'],
+        args['target_position_L'],
+        args['target_orientation_L'],
+        args['target_force_L'],
+        args['target_torque_L'],
+        args['duration']
+    )
 
     args['m_box'] = m_box       # unit kg
     args['target_force_R'] = [0, 0, force]

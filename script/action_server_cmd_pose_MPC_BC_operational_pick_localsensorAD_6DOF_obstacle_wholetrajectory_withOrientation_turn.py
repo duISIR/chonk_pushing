@@ -1022,6 +1022,10 @@ class CmdPoseActionServer(object):
                             pos_L_reasonal[:, i] += self.BC(self.n_planner, j) * (t_nomalized)**j * (1-t_nomalized)**(self.n_planner-j) * R_pos_Left[:, j]
                             ori_R_reasonal[:, i] += self.BC(self.n_planner, j) * (t_nomalized)**j * (1-t_nomalized)**(self.n_planner-j) * R_ori_Right[:, j]
                             ori_L_reasonal[:, i] += self.BC(self.n_planner, j) * (t_nomalized)**j * (1-t_nomalized)**(self.n_planner-j) * R_ori_Left[:, j]
+                for i in range(self.T_MPC):
+                    for j in range(4):
+                        ori_R_reasonal[j, i] /= optas.sumsqr(ori_R_reasonal[:, i])
+                        ori_L_reasonal[j, i] /= optas.sumsqr(ori_L_reasonal[:, i])
 #                print(self._t[self._idx-1])
 #                print(self.duration_MPC_planner)
 #                print(R_ori_Right)

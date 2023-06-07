@@ -73,7 +73,7 @@ class CmdPoseActionServer(object):
         # publishing command node name
         self._pub_cmd_topic_name = rospy.get_param('~cmd_topic_name', '/command')
         # load robot_description
-        param_robot_description = '~/robot_description_chonk'
+        param_robot_description = '~/robot_description_wholebody'
         if rospy.has_param(param_robot_description):
             self._robot_description = rospy.get_param(param_robot_description)
             self._urdf = URDF.from_parameter_server(param_robot_description)

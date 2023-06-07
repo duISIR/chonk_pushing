@@ -289,8 +289,8 @@ class CmdPoseActionServer(object):
 #        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_middle', dr_middle_var_MPC[:, 0], rhs=0.5*(init_dr_position_Right + init_dr_position_Left))
         builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Right', dr_pos_RARM_var_MPC[0:3, 0], rhs=init_dr_position_Right[0:3])
         builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Left', dr_pos_LARM_var_MPC[0:3, 0], rhs=init_dr_position_Left[0:3])
-        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_ori_Right', dr_ori_RARM_var_MPC[:, 0], rhs=init_dr_orientation_Right)
-        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_ori_Left', dr_ori_LARM_var_MPC[:, 0], rhs=init_dr_orientation_Left)
+#        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_ori_Right', dr_ori_RARM_var_MPC[:, 0], rhs=init_dr_orientation_Right)
+#        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_ori_Left', dr_ori_LARM_var_MPC[:, 0], rhs=init_dr_orientation_Left)
 #        builder_wholebodyMPC_planner.add_equality_constraint('final_dr_middle', dr_middle_var_MPC[:,-1], rhs=np.zeros(3))
         builder_wholebodyMPC_planner.add_equality_constraint('final_dr_right', dr_pos_RARM_var_MPC[:,self.T_MPC_planner-1], rhs=np.zeros(3))
         builder_wholebodyMPC_planner.add_equality_constraint('final_dr_left', dr_pos_LARM_var_MPC[:,self.T_MPC_planner-1], rhs=np.zeros(3))
@@ -412,8 +412,8 @@ class CmdPoseActionServer(object):
 
         inertia_Right = builder_wholebodyMPC.add_parameter('inertia_Right', 3, 3)  # inertia Right parameter
         inertia_Left = builder_wholebodyMPC.add_parameter('inertia_Left', 3, 3)  # inertia Left parameter
-        self.K_Right = np.diag([1000, 1000, 1000]) # Stiffness Right
-        self.K_Left = np.diag([1000, 1000, 1000]) # Stiffness Left
+        self.K_Right = np.diag([3000, 3000, 1000]) # Stiffness Right
+        self.K_Left = np.diag([3000, 3000, 1000]) # Stiffness Left
         self.D_Right = np.diag([2 * np.sqrt(self.m_ee_r*self.K_Right[0,0]), 2 * np.sqrt(self.m_ee_r*self.K_Right[1,1]), 2 * np.sqrt(self.m_ee_r*self.K_Right[2,2])]) # Damping Right
         self.D_Left = np.diag([2 * np.sqrt(self.m_ee_l*self.K_Left[0,0]), 2 * np.sqrt(self.m_ee_l*self.K_Left[1,1]), 2 * np.sqrt(self.m_ee_l*self.K_Left[2,2])]) # Damping Left
         ###################################################################################
@@ -553,14 +553,14 @@ class CmdPoseActionServer(object):
         builder_wholebodyMPC.add_equality_constraint('init_position', Q[0:4, 0], rhs=init_position_MPC[0:4])
         builder_wholebodyMPC.add_equality_constraint('init_position2', Q[6:self.ndof, 0], rhs=init_position_MPC[6:self.ndof])
         builder_wholebodyMPC.add_equality_constraint('head_miniscope', Q[4:6, :], rhs=np.zeros((2, self.T_MPC)))
-#        builder_wholebodyMPC.add_equality_constraint('Delta_p_Right_var_MPC_non_motion_direction_x', P_Right[0, :], rhs=np.zeros((1, self.T_MPC)))
-#        builder_wholebodyMPC.add_equality_constraint('Delta_p_Right_var_MPC_non_motion_direction_z', P_Right[1, :], rhs=np.zeros((1, self.T_MPC)))
-#        builder_wholebodyMPC.add_equality_constraint('Delta_p_Left_var_MPC_non_motion_direction_x', P_Left[0, :], rhs=np.zeros((1, self.T_MPC)))
-#        builder_wholebodyMPC.add_equality_constraint('Delta_p_Left_var_MPC_non_motion_direction_z', P_Left[1, :], rhs=np.zeros((1, self.T_MPC)))
-#        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Right_constraint_y', P_Right[2, 0], rhs = 0 )
-#        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Left_constraint_y',  P_Left[2, 0],  rhs = 0 )
-        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Right_constraint_y', P_Right[:, 0], rhs = np.zeros(3) )
-        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Left_constraint_y',  P_Left[:, 0],  rhs = np.zeros(3) )
+        builder_wholebodyMPC.add_equality_constraint('Delta_p_Right_var_MPC_non_motion_direction_x', P_Right[0, :], rhs=np.zeros((1, self.T_MPC)))
+        builder_wholebodyMPC.add_equality_constraint('Delta_p_Right_var_MPC_non_motion_direction_z', P_Right[1, :], rhs=np.zeros((1, self.T_MPC)))
+        builder_wholebodyMPC.add_equality_constraint('Delta_p_Left_var_MPC_non_motion_direction_x', P_Left[0, :], rhs=np.zeros((1, self.T_MPC)))
+        builder_wholebodyMPC.add_equality_constraint('Delta_p_Left_var_MPC_non_motion_direction_z', P_Left[1, :], rhs=np.zeros((1, self.T_MPC)))
+        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Right_constraint_y', P_Right[2, 0], rhs = 0 )
+        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Left_constraint_y',  P_Left[2, 0],  rhs = 0 )
+#        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Right_constraint_y', P_Right[:, 0], rhs = np.zeros(3) )
+#        builder_wholebodyMPC.add_equality_constraint('init_Delta_position_Left_constraint_y',  P_Left[:, 0],  rhs = np.zeros(3) )
         #########################################################################################
         dq_var_MPC = optas.casadi.SX(np.zeros((self.ndof, self.T_MPC)))
         w_dq = self.duration_MPC**2 * 0.05/float(self.T_MPC)
@@ -1060,10 +1060,10 @@ class CmdPoseActionServer(object):
 #        self.F_ext_Left = np.asarray([ msg.data[0], msg.data[1], msg.data[2], 0, msg.data[4], 0 ])
 
     def read_right_ee_grasp_ft_local_data_cb(self, msg):
-        self.F_ext_local_Right = np.asarray([ msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5]])
+        self.F_ext_local_Right = np.asarray([ msg.data[0], msg.data[1], msg.data[2], 0, 0, msg.data[5]])
 
     def read_left_ee_grasp_ft_local_data_cb(self, msg):
-        self.F_ext_local_Left = np.asarray([ msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5] ])
+        self.F_ext_local_Left = np.asarray([ msg.data[0], msg.data[1], msg.data[2], 0, 0, msg.data[5] ])
 
     def read_mux_selection(self, msg):
         self._correct_mux_selection = (msg.data == self._pub_cmd_topic_name)
