@@ -197,6 +197,8 @@ class CmdPoseActionServer(object):
         ddpos_box_goal = builder_wholebodyMPC.add_parameter('ddpos_box_goal', 3, self.T_MPC)
         m_box = builder_wholebodyMPC.add_parameter('m_box', 1)
         #####################################################################################
+        self.F_ext_global_Right = np.zeros(6); self.F_ext_global_Left = np.zeros(6);
+        self.F_ext_local_Right = np.zeros(6);  self.F_ext_local_Left = np.zeros(6);
         self.acc_box = np.zeros((3, self.T_MPC));
 #        self.acc_box = np.zeros(3);
         F_ext_Right_goal = builder_wholebodyMPC.add_parameter('F_ext_Right_goal', 3, self.T_MPC)
@@ -634,7 +636,7 @@ class CmdPoseActionServer(object):
                                                            'Tau_ext_Right_goal': torque_R_goal, 'Tau_ext_Left_goal': torque_L_goal,
                                                            'inertia_Right': self.I_ee_r_conventional[3:6, 3:6], 'inertia_Left': self.I_ee_l_conventional[3:6, 3:6],
                                                            'inertia_angular_Right': self.G_I_ee_r_conventional[0:3, 0:3], 'inertia_angular_Left': self.G_I_ee_l_conventional[0:3, 0:3],
-                                                           'Tau_ext_Right_actual': self.F_ext_Right[0:3], 'Tau_ext_Left_actual': self.F_ext_Left[0:3],
+                                                           'Tau_ext_Right_actual': self.F_ext_global_Right[0:3], 'Tau_ext_Left_actual': self.F_ext_global_Left[0:3],
                                                            'F_ext_Right_actual_local': self.F_ext_local_Right[3:6], 'F_ext_Left_actual_local': self.F_ext_local_Left[3:6],
                                                            'init_Delta_position_Right': self.Derivation_RARM_pos_start, 'init_Delta_position_Left': self.Derivation_LARM_pos_start,
                                                            'init_Delta_orientation_Right': self.Derivation_RARM_ori_start, 'init_Delta_orientation_Left': self.Derivation_LARM_ori_start,
@@ -685,10 +687,10 @@ class CmdPoseActionServer(object):
 #                    ddDelta_p_r += self.BC(n-2, j) * t**j * (1-t)**(n-2-j) * n * (n-1)* (P_Right[:, j+2] -  2*P_Right[:, j+1] + P_Right[:, j])
 #                    ddDelta_p_l += self.BC(n-2, j) * t**j * (1-t)**(n-2-j) * n * (n-1)* (P_Left[:, j+2] -  2*P_Left[:, j+1] + P_Left[:, j])
 #                #####################################################################################
-#                F_r = self.F_ext_Right[3:6] + self.K_Right @ Delta_p_r
-#                F_l = self.F_ext_Left[3:6]  + self.K_Left @ Delta_p_l
-#                F_r = self.F_ext_Right[3:6] + self.G_I_ee_r_conventional[3:6, 3:6] @ ddDelta_p_r + self.K_Right @ Delta_p_r + self.D_Right @ dDelta_p_r
-#                F_l = self.F_ext_Left[3:6] + self.G_I_ee_l_conventional[3:6, 3:6] @ ddDelta_p_l + self.K_Left @ Delta_p_l + self.D_Left @ dDelta_p_l
+#                F_r = self.F_ext_global_Right[3:6] + self.K_Right @ Delta_p_r
+#                F_l = self.F_ext_global_Left[3:6]  + self.K_Left @ Delta_p_l
+#                F_r = self.F_ext_global_Right[3:6] + self.G_I_ee_r_conventional[3:6, 3:6] @ ddDelta_p_r + self.K_Right @ Delta_p_r + self.D_Right @ dDelta_p_r
+#                F_l = self.F_ext_global_Left[3:6] + self.G_I_ee_l_conventional[3:6, 3:6] @ ddDelta_p_l + self.K_Left @ Delta_p_l + self.D_Left @ dDelta_p_l
 
 #                print(F_r)
 #                print(F_l)
@@ -788,10 +790,10 @@ class CmdPoseActionServer(object):
         self.dq_curr_base = [float(msg.twist.twist.linear.x), float(msg.twist.twist.linear.y), float(msg.twist.twist.angular.z)]
 
     def read_right_ee_grasp_ft_data_cb(self, msg):
-        self.F_ext_Right = np.asarray([ msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5]])
+        self.F_ext_global_Right = np.asarray([ msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5]])
 
     def read_left_ee_grasp_ft_data_cb(self, msg):
-        self.F_ext_Left = np.asarray([ msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5] ])
+        self.F_ext_global_Left = np.asarray([ msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5] ])
 
     def read_right_ee_grasp_ft_local_data_cb(self, msg):
         self.F_ext_local_Right = np.asarray([ msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5]])
