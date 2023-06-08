@@ -402,7 +402,7 @@ class CmdPoseActionServer(object):
 
         self.m_ee_r = 0.3113;
         self.m_ee_l = 0.3113;
-        stiffness = 1000;
+        stiffness = 1500;
 
         inertia_Right = builder_wholebodyMPC.add_parameter('inertia_Right', 3, 3)  # inertia Right parameter
         inertia_Left = builder_wholebodyMPC.add_parameter('inertia_Left', 3, 3)  # inertia Left parameter
@@ -1033,6 +1033,10 @@ class CmdPoseActionServer(object):
         base_euler_angle = tf.transformations.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
         self.q_curr_base = [msg.pose.pose.position.x, msg.pose.pose.position.y, base_euler_angle[2]]
         self.donkey_R = optas.spatialmath.rotz(base_euler_angle[2])
+#        print(self.donkey_R)
+        self.base_quaternion = optas.spatialmath.Quaternion(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
+        self.rpy = self.base_quaternion.getrpy()
+#        self.donkey_R = optas.spatialmath.rpy2r(self.rpy)
         self.donkey_position = np.asarray([msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z])
         self.donkey_velocity = np.asarray([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z])
         self.donkey_angular_velocity = np.asarray([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z])
