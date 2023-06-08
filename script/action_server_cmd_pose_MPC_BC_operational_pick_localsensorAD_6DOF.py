@@ -340,10 +340,10 @@ class CmdPoseActionServer(object):
         #########################################################################################
 
         dq_var_MPC = optas.casadi.SX(np.zeros((self.ndof, self.T_MPC)))
-        w_dq = 0.0001/float(self.T_MPC)
+        w_dq = self.duration_MPC**2 * 0.05/float(self.T_MPC)
         for i in range(self.T_MPC):
             for j in range(self.T_MPC-1):
-                dq_var_MPC[:, i] += self.BC(self.n-1, j) * t[i]**j * (1-t[i])**(self.n-1-j) * self.n * (Q[:, j+1] -  Q[:, j])
+                dq_var_MPC[:, i] += (1./self.duration_MPC) * self.BC(self.n-1, j) * t[i]**j * (1-t[i])**(self.n-1-j) * self.n * (Q[:, j+1] -  Q[:, j])
             if(i<(self.T_MPC -1)):
                 name = 'control_point_deriv_' + str(i) + '_bound'  # add velocity constraint for each Q[:, i]
                 builder_wholebodyMPC.add_bound_inequality_constraint(name, lhs=dlower, mid=self.n * (Q[:, i+1] -  Q[:, i]), rhs=dupper)
@@ -353,10 +353,10 @@ class CmdPoseActionServer(object):
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_phi_Right' + str(i), w_dq * optas.sumsqr(dDelta_phi_Right_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_phi_Left' + str(i), w_dq * optas.sumsqr(dDelta_phi_Left_var_MPC[:, i]))
         ddq_var_MPC = optas.casadi.SX(np.zeros((self.ndof, self.T_MPC)))
-        w_ddq = 0.0005/float(self.T_MPC)
+        w_ddq = self.duration_MPC**4 * 0.05/float(self.T_MPC)
         for i in range(self.T_MPC):
             for j in range(self.T_MPC-2):
-                ddq_var_MPC[:, i] += self.BC(self.n-2, j) * t[i]**j * (1-t[i])**(self.n-2-j) * self.n * (self.n-1)* (Q[:, j+2] -  2*Q[:, j+1] + Q[:, j])
+                ddq_var_MPC[:, i] += (1./self.duration_MPC)**2 * self.BC(self.n-2, j) * t[i]**j * (1-t[i])**(self.n-2-j) * self.n * (self.n-1)* (Q[:, j+2] -  2*Q[:, j+1] + Q[:, j])
             builder_wholebodyMPC.add_cost_term('minimize_acceleration' + str(i), w_ddq * optas.sumsqr(ddq_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_ddDelta_p_Right' + str(i), w_ddq * optas.sumsqr(ddDelta_p_Right_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_ddDelta_p_Left' + str(i), w_ddq * optas.sumsqr(ddDelta_p_Left_var_MPC[:, i]))
@@ -787,7 +787,7 @@ class CmdPoseActionServer(object):
                     q_next += self.BC(n, j) * t**j * (1-t)**(n-j) * Q[:, j]
                 dq_next = np.zeros(self.ndof)
                 for j in range(self.T_MPC-1):
-                    dq_next += self.BC(n-1, j) * t**j * (1-t)**(n-1-j) * n * (Q[:, j+1] -  Q[:, j])
+                    dq_next += (1./self.duration_MPC) * self.BC(n-1, j) * t**j * (1-t)**(n-1-j) * n * (Q[:, j+1] -  Q[:, j])
 
                 ddq_next = np.zeros(self.ndof)
                 for j in range(self.T_MPC-2):

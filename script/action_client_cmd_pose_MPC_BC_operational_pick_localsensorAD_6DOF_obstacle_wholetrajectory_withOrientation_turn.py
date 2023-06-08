@@ -187,7 +187,7 @@ if __name__ == '__main__':
 
     client = actionlib.SimpleActionClient('/chonk/cmd_pose', CmdChonkPoseForceAction)
 
-    force = 30
+    force = 20
     m_box = 1.2
 
     # Initialize node class
