@@ -630,7 +630,7 @@ class CmdPoseActionServer(object):
                 dq_var_MPC[:, i] += (1./self.duration_MPC) * self.BC(self.n-1, j) * t[i]**j * (1-t[i])**(self.n-1-j) * self.n * (Q[:, j+1] -  Q[:, j])
             if(i<(self.T_MPC -1)):
                 name = 'control_point_deriv_' + str(i) + '_bound'  # add velocity constraint for each Q[:, i]
-                builder_wholebodyMPC.add_bound_inequality_constraint(name, lhs=dlower, mid=self.n * (Q[:, i+1] -  Q[:, i]), rhs=dupper)
+                builder_wholebodyMPC.add_bound_inequality_constraint(name, lhs=dlower, mid=(1./self.duration_MPC) * self.n * (Q[:, i+1] -  Q[:, i]), rhs=dupper)
             builder_wholebodyMPC.add_cost_term('minimize_velocity' + str(i), w_dq * optas.sumsqr(dq_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_p_Right' + str(i), w_dq * optas.sumsqr(dDelta_p_Right_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_p_Left' + str(i), w_dq * optas.sumsqr(dDelta_p_Left_var_MPC[:, i]))

@@ -106,7 +106,7 @@ if __name__ == '__main__':
     # read current robot joint positions
     try:
         (trans_box,rot_box) = tf_listener.lookupTransform('/vicon/world', '/vicon/eva_box/eva_box',  rospy.Time(0))
-        trans_box[2] += 0.2
+        trans_box[2] += 0.15
         box_euler_angle = tf.transformations.euler_from_quaternion([rot_box[0], rot_box[1], rot_box[2], rot_box[3]])
         box_Rotation = optas.spatialmath.rotz(box_euler_angle[2])
         box_inWorld = np.array([[trans_box[0]], [trans_box[1]], [trans_box[2]]])
@@ -199,7 +199,7 @@ if __name__ == '__main__':
 
     client = actionlib.SimpleActionClient('/chonk/cmd_pose', CmdChonkPoseForceAction)
 
-    force = 20
+    force = 30
     m_box = 0.8
 
     # Initialize node class
@@ -242,9 +242,9 @@ if __name__ == '__main__':
     ori_L = optas.spatialmath.Quaternion.fromrpy([np.pi-np.pi/2,    np.pi/2 - np.pi/3,    box_euler_angle[2]]).getquat()
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
-    Right_inbox = np.array([[0.1], [-0.3], [0], [1]])
+    Right_inbox = np.array([[0], [-0.3], [0], [1]])
     Right_inWorld = (T @ Right_inbox)[0:3]
-    Left_inbox = np.array([[0.1], [0.3], [0], [1]])
+    Left_inbox = np.array([[0], [0.3], [0], [1]])
     Left_inWorld = (T @ Left_inbox)[0:3]
     args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
     args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
@@ -265,15 +265,15 @@ if __name__ == '__main__':
         args['target_torque_L'],
         args['duration']
     )
-    Right_inbox = np.array([[0.1], [-0.135], [0], [1]])
+    Right_inbox = np.array([[0], [-0.135], [0], [1]])
     Right_inWorld = (T @ Right_inbox)[0:3]
-    Left_inbox = np.array([[0.1], [0.135], [0], [1]])
+    Left_inbox = np.array([[0], [0.135], [0], [1]])
     Left_inWorld = (T @ Left_inbox)[0:3]
     args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
     args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
 
     # Initialize node class
-    args['duration']=3.0
+    args['duration']=4.0
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],
@@ -289,15 +289,15 @@ if __name__ == '__main__':
         args['duration']
     )
 
-    Right_inbox = np.array([[0.1], [-0.135], [0], [1]])
+    Right_inbox = np.array([[0], [-0.135], [0], [1]])
     Right_inWorld = (T @ Right_inbox)[0:3]
-    Left_inbox = np.array([[0.1], [0.135], [0], [1]])
+    Left_inbox = np.array([[0], [0.135], [0], [1]])
     Left_inWorld = (T @ Left_inbox)[0:3]
     args['target_position_R'] = [Right_inWorld[0], Right_inWorld[1], trans_box[2]]
     args['target_position_L'] = [Left_inWorld[0], Left_inWorld[1], trans_box[2]]
 
     # Initialize node class
-    args['duration']=6.0
+    args['duration']=4.0
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],

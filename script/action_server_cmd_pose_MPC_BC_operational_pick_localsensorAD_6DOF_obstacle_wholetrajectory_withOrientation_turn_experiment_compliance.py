@@ -109,7 +109,7 @@ class CmdPoseActionServer(object):
             urdf_string=self._robot_description,
             time_derivs=[0],
             param_joints=['base_joint_1', 'base_joint_2', 'base_joint_3', 'CHEST_JOINT0', 'HEAD_JOINT0', 'HEAD_JOINT1', 'LARM_JOINT0', 'LARM_JOINT1', 'LARM_JOINT2', 'LARM_JOINT3', 'LARM_JOINT4', 'LARM_JOINT5', 'RARM_JOINT0', 'RARM_JOINT1', 'RARM_JOINT2', 'RARM_JOINT3', 'RARM_JOINT4', 'RARM_JOINT5'],
-            name='chonk_wholebodyMPC'
+            name='chonk_wholebodyMPC_planner'
         )
         self.wholebodyMPC_planner_name = self.wholebodyMPC_planner.get_name()
 #        self.dt_MPC_planner = 0.1 # time step
@@ -229,7 +229,7 @@ class CmdPoseActionServer(object):
 
         for i in range(self.T_MPC_planner):
             obstacle_pos = np.asarray([[4.67], [1.63]])
-            obstacle_radius = 1.3
+            obstacle_radius = 0.9
 #            builder_wholebodyMPC_planner.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2 + r_ep[i])
             builder_wholebodyMPC_planner.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2)
 
@@ -286,15 +286,15 @@ class CmdPoseActionServer(object):
                 dr_ori_RARM_var_MPC[:, i] += (1./duration_MPC_planner) * self.BC(self.n_planner-1, j) * t[i]**j * (1-t[i])**(self.n_planner-1-j) * self.n_planner * (R_ori_Right[:, j+1] -  R_ori_Right[:, j])
                 dr_ori_LARM_var_MPC[:, i] += (1./duration_MPC_planner) * self.BC(self.n_planner-1, j) * t[i]**j * (1-t[i])**(self.n_planner-1-j) * self.n_planner * (R_ori_Left[:, j+1] -  R_ori_Left[:, j])
 #            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_middle' + str(i), w_dr * optas.sumsqr(dr_middle_var_MPC[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_right' + str(i), w_dr * optas.sumsqr(dr_pos_RARM_var_MPC[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_left' + str(i), w_dr * optas.sumsqr(dr_pos_LARM_var_MPC[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_ori_right' + str(i), w_dr * optas.sumsqr(dr_ori_RARM_var_MPC[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_ori_left' + str(i), w_dr * optas.sumsqr(dr_ori_LARM_var_MPC[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_right' + str(i), w_dr * optas.sumsqr(dr_pos_RARM_var_MPC[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_left' + str(i), w_dr * optas.sumsqr(dr_pos_LARM_var_MPC[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_ori_right' + str(i), w_dr * optas.sumsqr(dr_ori_RARM_var_MPC[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('minimize_dr_ori_left' + str(i), w_dr * optas.sumsqr(dr_ori_LARM_var_MPC[:, i]))
 
 
 #        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_middle', dr_middle_var_MPC[:, 0], rhs=0.5*(init_dr_position_Right + init_dr_position_Left))
-        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Right', dr_pos_RARM_var_MPC[0:2, 0], rhs=init_dr_position_Right[0:2])
-        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Left', dr_pos_LARM_var_MPC[0:2, 0], rhs=init_dr_position_Left[0:2])
+        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Right', dr_pos_RARM_var_MPC[0:3, 0], rhs=init_dr_position_Right[0:3])
+        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_Left', dr_pos_LARM_var_MPC[0:3, 0], rhs=init_dr_position_Left[0:3])
 #        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_ori_Right', dr_ori_RARM_var_MPC[:, 0], rhs=init_dr_orientation_Right)
 #        builder_wholebodyMPC_planner.add_equality_constraint('init_dr_ori_Left', dr_ori_LARM_var_MPC[:, 0], rhs=init_dr_orientation_Left)
 #        builder_wholebodyMPC_planner.add_equality_constraint('final_dr_middle', dr_middle_var_MPC[:,-1], rhs=np.zeros(3))
@@ -325,10 +325,10 @@ class CmdPoseActionServer(object):
                 ddr_ori_RARM_var_MPC[:, i] += (1./duration_MPC_planner)**2 * self.BC(self.n_planner-2, j) * t[i]**j * (1-t[i])**(self.n_planner-2-j) * self.n_planner * (self.n_planner-1)* (R_ori_Right[:, j+2] -  2*R_ori_Right[:, j+1] + R_ori_Right[:, j])
                 ddr_ori_LARM_var_MPC[:, i] += (1./duration_MPC_planner)**2 * self.BC(self.n_planner-2, j) * t[i]**j * (1-t[i])**(self.n_planner-2-j) * self.n_planner * (self.n_planner-1)* (R_ori_Left[:, j+2] -  2*R_ori_Left[:, j+1] + R_ori_Left[:, j])
 #            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_middle' + str(i), w_ddr * optas.sumsqr(ddr_middle_var_MPC[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_right' + str(i), w_ddr * optas.sumsqr(ddr_pos_RARM_var_MPC[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_left' + str(i), w_ddr * optas.sumsqr(ddr_pos_LARM_var_MPC[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_ori_right' + str(i), w_ddr * optas.sumsqr(ddr_ori_RARM_var_MPC[:, i]))
-            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_ori_left' + str(i), w_ddr * optas.sumsqr(ddr_ori_LARM_var_MPC[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_right' + str(i), w_ddr * optas.sumsqr(ddr_pos_RARM_var_MPC[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_left' + str(i), w_ddr * optas.sumsqr(ddr_pos_LARM_var_MPC[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_ori_right' + str(i), w_ddr * optas.sumsqr(ddr_ori_RARM_var_MPC[:, i]))
+#            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_ori_left' + str(i), w_ddr * optas.sumsqr(ddr_ori_LARM_var_MPC[:, i]))
 
 #            builder_wholebodyMPC_planner.add_cost_term('minimize_ddr_two arm equal' + str(i), w_ddr * 10 * optas.sumsqr(ddr_pos_RARM_var_MPC[:, i] - ddr_pos_LARM_var_MPC[:, i]))
 
@@ -359,8 +359,8 @@ class CmdPoseActionServer(object):
 
         # setup solver
         self.solver_wholebodyMPC_planner = optas.CasADiSolver(optimization=builder_wholebodyMPC_planner.build()).setup('knitro', solver_options={
-#                                                                                                       'knitro.OutLev': 0,
-                                                                                                       'print_time': 0,
+                                                                                                       'knitro.OutLev': 0,
+#                                                                                                       'print_time': 0,
 #                                                                                                       'knitro.par_msnumthreads': 14,
                                                                                                        'knitro.act_qpalg': 1,
                                                                                                        'knitro.FeasTol': 1e-4, 'knitro.OptTol': 1e-4, 'knitro.ftol':1e-4,
@@ -624,7 +624,7 @@ class CmdPoseActionServer(object):
                 dq_var_MPC[:, i] += (1./self.duration_MPC) * self.BC(self.n-1, j) * t[i]**j * (1-t[i])**(self.n-1-j) * self.n * (Q[:, j+1] -  Q[:, j])
             if(i<(self.T_MPC -1)):
                 name = 'control_point_deriv_' + str(i) + '_bound'  # add velocity constraint for each Q[:, i]
-                builder_wholebodyMPC.add_bound_inequality_constraint(name, lhs=dlower, mid=self.n * (Q[:, i+1] -  Q[:, i]), rhs=dupper)
+                builder_wholebodyMPC.add_bound_inequality_constraint(name, lhs=dlower, mid=(1./self.duration_MPC) * self.n * (Q[:, i+1] -  Q[:, i]), rhs=dupper)
             builder_wholebodyMPC.add_cost_term('minimize_velocity' + str(i), w_dq * optas.sumsqr(dq_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_p_Right' + str(i), w_dq * optas.sumsqr(dDelta_p_Right_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_p_Left' + str(i), w_dq * optas.sumsqr(dDelta_p_Left_var_MPC[:, i]))

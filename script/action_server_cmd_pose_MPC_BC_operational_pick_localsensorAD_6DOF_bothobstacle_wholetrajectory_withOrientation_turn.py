@@ -224,7 +224,6 @@ class CmdPoseActionServer(object):
 
 
 
-
         for i in range(self.T_MPC_planner):
             obstacle_pos = np.asarray([[4.67], [1.63]])
             obstacle_radius = 0.9
@@ -358,7 +357,7 @@ class CmdPoseActionServer(object):
         # setup solver
         self.solver_wholebodyMPC_planner = optas.CasADiSolver(optimization=builder_wholebodyMPC_planner.build()).setup('knitro', solver_options={
                                                                                                        'knitro.OutLev': 0,
-#                                                                                                       'print_time': 0,
+                                                                                                       'print_time': 0,
 #                                                                                                       'knitro.par_msnumthreads': 14,
                                                                                                        'knitro.act_qpalg': 1,
                                                                                                        'knitro.FeasTol': 1e-4, 'knitro.OptTol': 1e-4, 'knitro.ftol':1e-4,
@@ -380,7 +379,7 @@ class CmdPoseActionServer(object):
         lower, upper = wholebodyMPC_LIMITS.get_limits(time_deriv=0)
         dlower, dupper = wholebodyMPC_LIMITS.get_limits(time_deriv=1)
         self.wholebodyMPC_name = self.wholebodyMPC.get_name()
-        self.dt_MPC = 0.1 # time step
+        self.dt_MPC = 0.15 # time step
         self.T_MPC = 6 # T is number of time steps
         self.duration_MPC = float(self.T_MPC-1)*self.dt_MPC
         # nominal robot configuration
@@ -534,6 +533,11 @@ class CmdPoseActionServer(object):
         Delta_quaternion_Left_var_MPC = optas.casadi.SX(np.zeros((4, self.T_MPC)))
 
         #####################################################################################
+        r_middle_var_MPC = optas.casadi.SX(np.zeros((2, self.T_MPC)))
+        donkey_transform = self.wholebodyMPC.get_global_link_transform_function(link=self._link_donkey)
+        donkey_pos1 = optas.casadi.SX(np.zeros((2, self.T_MPC)))
+        donkey_pos2 = optas.casadi.SX(np.zeros((2, self.T_MPC)))
+
 
 
         for i in range(self.T_MPC):
@@ -598,6 +602,19 @@ class CmdPoseActionServer(object):
                 builder_wholebodyMPC.add_cost_term('Right_torque_distance' + str(i), 0.05 * optas.sumsqr(Phi_Right[:, i+1] - Phi_Right[:, i]))
                 builder_wholebodyMPC.add_cost_term('Left_torque_distance' + str(i), 0.05 * optas.sumsqr(Phi_Left[:, i+1] - Phi_Left[:, i]))
 
+        for i in range(self.T_MPC):
+            if(i>0):
+                r_middle_var_MPC[:, i] = 0.5*(self.pos_fnc_Left(q_var_MPC[:, i])[0:2] + self.pos_fnc_Left(q_var_MPC[:, i])[0:2])
+                obstacle_pos = np.asarray([[4.67], [1.63]])
+                obstacle_radius = 0.9
+                donkey_pos1[:, i] = (donkey_transform(q_var_MPC[:, i]) @ np.array([0.3+0.48, 0, 0, 1]))[0:2]
+                donkey_pos2[:, i] = (donkey_transform(q_var_MPC[:, i]) @ np.array([0.3-0.48, 0, 0, 1]))[0:2]
+
+#                builder_wholebodyMPC.add_geq_inequality_constraint('middle_obstacle' + str(i), lhs=(r_middle_var_MPC[0:2, i]-obstacle_pos).T @ (r_middle_var_MPC[0:2, i]-obstacle_pos), rhs=obstacle_radius**2)
+#                builder_wholebodyMPC.add_geq_inequality_constraint('donkey_obstacle' + str(i), lhs=(donkey_pos(q_var_MPC[:, i])[0:2]-obstacle_pos).T @ (donkey_pos(q_var_MPC[:, i])[0:2]-obstacle_pos), rhs=obstacle_radius**2)
+                builder_wholebodyMPC.add_geq_inequality_constraint('donkey_obstacle' + str(i), lhs=(donkey_pos1[:, i]-obstacle_pos).T @ (donkey_pos1[:, i]-obstacle_pos)+ (donkey_pos2[:, i]-obstacle_pos).T @ (donkey_pos2[:, i]-obstacle_pos), rhs=obstacle_radius**2+1**2)
+
+
 
         #########################################################################################
         # add position constraint at the beginning state
@@ -655,16 +672,16 @@ class CmdPoseActionServer(object):
         #########################################################################################
 
         # setup solver
-        self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={
-                                                                                                       'knitro.OutLev': 0,
-#                                                                                                       'print_time': 0,
-#                                                                                                       'knitro.FeasTol': 5e-5, 'knitro.OptTol': 5e-5, 'knitro.ftol':5e-5,
-                                                                                                       'knitro.algorithm':1,
-                                                                                                       'knitro.linsolver':2,
-#                                                                                                       'knitro.maxtime_real': 1.8e-2,
-                                                                                                       'knitro.bar_initpt':3, 'knitro.bar_murule':4,
-                                                                                                       'knitro.bar_penaltycons': 1, 'knitro.bar_penaltyrule':2,
-                                                                                                       'knitro.bar_switchrule':2, 'knitro.linesearch': 1} )
+#        self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={
+#                                                                                                       'knitro.OutLev': 0,
+##                                                                                                       'print_time': 0,
+##                                                                                                       'knitro.FeasTol': 5e-5, 'knitro.OptTol': 5e-5, 'knitro.ftol':5e-5,
+#                                                                                                       'knitro.algorithm':1,
+#                                                                                                       'knitro.linsolver':2,
+##                                                                                                       'knitro.maxtime_real': 1.8e-2,
+#                                                                                                       'knitro.bar_initpt':3, 'knitro.bar_murule':4,
+#                                                                                                       'knitro.bar_penaltycons': 1, 'knitro.bar_penaltyrule':2,
+#                                                                                                       'knitro.bar_switchrule':2, 'knitro.linesearch': 1} )
         self.ti_MPC = 0 # time index of the MPC
         self.solution_MPC = None
         self.time_linspace = np.linspace(0., self.duration_MPC, self.T_MPC)
@@ -682,6 +699,18 @@ class CmdPoseActionServer(object):
 
         self.m_box = 0
         self.acc_box = np.zeros((3, self.T_MPC))
+
+        self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={
+                                                                                                       'knitro.OutLev': 0,
+#                                                                                                       'print_time': 0,
+#                                                                                                       'knitro.par_msnumthreads': 14,
+                                                                                                       'knitro.act_qpalg': 1,
+                                                                                                       'knitro.FeasTol': 1e-5, 'knitro.OptTol': 1e-5, 'knitro.ftol':1e-5,
+                                                                                                       'knitro.algorithm':3, 'knitro.linsolver':2,
+#                                                                                                       'knitro.maxtime_real': 4.0e-3,
+                                                                                                       'knitro.bar_initpt':3, 'knitro.bar_murule':4, 'knitro.bar_penaltycons': 1,
+                                                                                                       'knitro.bar_penaltyrule':2, 'knitro.bar_switchrule':2, 'knitro.linesearch': 1
+                                                                                                       } )
 
 
 
