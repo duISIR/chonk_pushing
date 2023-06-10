@@ -64,7 +64,8 @@ With motion planning of two end-effectors' positions, MPC tracking operational t
 2. roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory.launch
    roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_turn_experimentgazebo.launch 
 3. roslaunch chonk_dynamics chonk_dynamics.launch
-4. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory.py or
+4. rosrun chonk_pushing action_client_cmd_config_wholetrajectory.py
+5. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory.py or
    rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_turn.py 
    rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_turn_experimentgazebo.py 
    
@@ -75,26 +76,55 @@ With motion planning of two end-effectors' positions and orientation, MPC tracki
 2. roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation.launch or
    roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation_turn_experimentgazebo.launch 
 3. roslaunch chonk_dynamics chonk_dynamics.launch
-4. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation.py or
+4. rosrun chonk_pushing action_client_cmd_config_wholetrajectory.py
+5. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation.py or
    rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation_turn.py or 
-   rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation_turn_experimentgazebo.py 
    rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_obstacle_wholetrajectory_withOrientation_turn_experimentgazebo.py 
    
 ########### Below relates to 6-DOF admittance control in local frame ###########################
 
-With admittance control in local frame, MPC tracking operational trajectory
-1. roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF.launch 
+With 6-DOF admittance control, MPC tracking operational trajectory
+1. roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF_turn.launch 
 2. roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_6DOF.launch 
 3. roslaunch chonk_dynamics chonk_dynamics.launch
 4. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF.py 
 
-With admittance control in local frame and obstacle avoidance, MPC tracking operational trajectory
+With 6-DOF admittance control and obstacle avoidance, MPC tracking operational trajectory
+1. roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_longhorizon.launch or
+   roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_longhorizon_turn.launch
+2. roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_longhorizon.launch 
+3. roslaunch chonk_dynamics chonk_dynamics.launch
+4. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_longhorizon.py or
+   rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_longhorizon_turn.py
 
+With 6-DOF admittance control and obstacle avoidance, with motion planning of two end-effectors' positions and orientation, MPC tracking operational trajectory 
+1. roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_wholetrajectory_withOrientation.launch or
+   roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_wholetrajectory_withOrientation_turn.launch or
+2. roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_wholetrajectory_withOrientation.launch or
+   roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_wholetrajectory_withOrientation_turn.launch or
+3. roslaunch chonk_dynamics chonk_dynamics.launch
+4. rosrun chonk_pushing action_client_cmd_config_wholetrajectory.py
+5. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_wholetrajectory_withOrientation.py or
+   rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_wholetrajectory_withOrientation_turn.py or 
 
-With motion planning of two end-effectors' positions, MPC tracking operational trajectory with admittance control in local frame
+########### Add obstacle avoidance in motion tracking ###########################
 
+With 6-DOF admittance control and obstacle avoidance, with motion planning of two end-effectors' positions and orientation, MPC tracking operational trajectory 
+1. roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch 
+2. roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
+3. roslaunch chonk_dynamics chonk_dynamics.launch
+4. rosrun chonk_pushing action_client_cmd_config_wholetrajectory.py
+5. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.py
    
-With motion planning of two end-effectors' positions and orientation, MPC tracking operational trajectory with admittance control in local frame
+########### Parallel Programming ###########################
+
+With 6-DOF admittance control and obstacle avoidance, with motion planning of two end-effectors' positions and orientation, MPC tracking operational trajectory 
+1. roslaunch chonk_pushing gazebo_planner_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch 
+2. roslaunch chonk_pushing action_servers_planner_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
+3. roslaunch chonk_pushing action_servers_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
+4. roslaunch chonk_dynamics chonk_dynamics.launch
+5. rosrun chonk_pushing action_client_cmd_config_wholetrajectory.py
+6. rosrun chonk_pushing action_client_planner_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.py 
 
 
 
