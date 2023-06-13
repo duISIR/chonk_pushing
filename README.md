@@ -87,7 +87,7 @@ With 6-DOF admittance control, MPC tracking operational trajectory
 1. roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF_turn.launch 
 2. roslaunch chonk_pushing action_servers_MPC_BC_operational_pick_localsensorAD_6DOF.launch 
 3. roslaunch chonk_dynamics chonk_dynamics.launch
-4. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF.py 
+4. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF_turn.py 
 
 With 6-DOF admittance control and obstacle avoidance, MPC tracking operational trajectory
 1. roslaunch chonk_pushing gazebo_planner_MPC_BC_operational_pick_localsensorAD_6DOF_obstacle_longhorizon.launch or

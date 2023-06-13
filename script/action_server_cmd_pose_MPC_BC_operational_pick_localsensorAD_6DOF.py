@@ -351,6 +351,10 @@ class CmdPoseActionServer(object):
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_p_Left' + str(i), w_dq * optas.sumsqr(dDelta_p_Left_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_phi_Right' + str(i), w_dq * optas.sumsqr(dDelta_phi_Right_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_phi_Left' + str(i), w_dq * optas.sumsqr(dDelta_phi_Left_var_MPC[:, i]))
+
+        builder_wholebodyMPC.add_equality_constraint('init_velocity', dq_var_MPC[0:3, 0], rhs=init_velocity_MPC[0:3])
+#        builder_wholebodyMPC.add_equality_constraint('init_velocity2', dq_var_MPC[6:self.ndof, 0], rhs=init_velocity_MPC[6:self.ndof])
+
         ddq_var_MPC = optas.casadi.SX(np.zeros((self.ndof, self.T_MPC)))
         w_ddq = 0.0005/float(self.T_MPC)
         for i in range(self.T_MPC):
@@ -378,7 +382,7 @@ class CmdPoseActionServer(object):
         # setup solver
         self.solver_wholebodyMPC = optas.CasADiSolver(optimization=builder_wholebodyMPC.build()).setup('knitro', solver_options={
                                                                                                        'knitro.OutLev': 0,
-                                                                                                       'print_time': 0,
+#                                                                                                       'print_time': 0,
                                                                                                        'knitro.FeasTol': 1e-6, 'knitro.OptTol': 1e-6, 'knitro.ftol':1e-6,
                                                                                                        'knitro.algorithm':1,
                                                                                                        'knitro.linsolver':2,

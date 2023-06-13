@@ -654,6 +654,9 @@ class CmdForceActionServer(object):
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_p_Left' + str(i), w_dq * optas.sumsqr(dDelta_p_Left_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_phi_Right' + str(i), w_dq * optas.sumsqr(dDelta_phi_Right_var_MPC[:, i]))
             builder_wholebodyMPC.add_cost_term('minimize_dDelta_phi_Left' + str(i), w_dq * optas.sumsqr(dDelta_phi_Left_var_MPC[:, i]))
+
+#        builder_wholebodyMPC.add_equality_constraint('init_velocity', dq_var_MPC[0:3, 0], rhs=init_velocity_MPC[0:3])
+#        builder_wholebodyMPC.add_equality_constraint('init_velocity2', dq_var_MPC[6:self.ndof, 0], rhs=init_velocity_MPC[6:self.ndof])
         ddq_var_MPC = optas.casadi.SX(np.zeros((self.ndof, self.T_MPC)))
         w_ddq = 0.05/float(self.T_MPC)
         for i in range(self.T_MPC):
@@ -949,12 +952,17 @@ class CmdForceActionServer(object):
         ### ---------------------------------------------------------
 
         self.curr_MPC = np.zeros((self.ndof, self.T_MPC))
+        pos_right_initial = np.array(self.pos_fnc_Right_planner(self.q_curr))[0:3, 0]
+        ori_right_initial = np.array(self.ori_fnc_Right_planner(self.q_curr))[0:4, 0]
+        pos_left_initial = np.array(self.pos_fnc_Left_planner(self.q_curr))[0:3, 0]
+        ori_left_initial = np.array(self.ori_fnc_Left_planner(self.q_curr))[0:4, 0]
+        self.curr_MPC = np.zeros((self.ndof, self.T_MPC))
         for i in range(self.T_MPC):
             self.curr_MPC[:,i] = self.q_curr
-            self.pos_R_reference[:, i] = np.array(self.pos_fnc_Right_planner(self.q_curr))[0:3, 0]
-            self.pos_L_reference[:, i] = np.array(self.pos_fnc_Left_planner(self.q_curr))[0:3, 0]
-            self.ori_R_reference[:, i] = np.array(self.ori_fnc_Right_planner(self.q_curr))[0:4, 0]
-            self.ori_L_reference[:, i] = np.array(self.ori_fnc_Left_planner(self.q_curr))[0:4, 0]
+            self.pos_R_reference[:, i] = pos_right_initial
+            self.pos_L_reference[:, i] = pos_left_initial
+            self.ori_R_reference[:, i] = ori_right_initial
+            self.ori_L_reference[:, i] = ori_left_initial
 
         # create timer
         dur = rospy.Duration(1.0/self._freq)
