@@ -43,7 +43,7 @@
     </node>
     <!-- Action Service Node for planning joint positions and build MPC to track the planning results -->
     <node
-        name="cmd_pose_server_MPC_BC_operational"
+        name="planner_server"
         pkg="chonk_pushing"
         ns="/$(arg robot_name)"
         type="action_server_planner_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.py"

@@ -6,7 +6,7 @@
 
     <!-- Action Service Node for tracking joint positions and build MPC to track the planning results -->
     <node
-        name="tracking_server_MPC_BC_operational"
+        name="tracking_server"
         pkg="chonk_pushing"
         ns="/$(arg robot_name)"
         type="action_server_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.py"
