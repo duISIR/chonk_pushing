@@ -381,7 +381,7 @@ class CmdPoseActionServer(object):
         dlower, dupper = wholebodyMPC_LIMITS.get_limits(time_deriv=1)
         self.wholebodyMPC_name = self.wholebodyMPC.get_name()
         self.dt_MPC = 0.15 # time step
-        self.T_MPC = 8 # T is number of time steps
+        self.T_MPC = 7 # T is number of time steps
         self.duration_MPC = float(self.T_MPC-1)*self.dt_MPC
         # nominal robot configuration
         self.wholebodyMPC_opt_idx = self.wholebodyMPC.optimized_joint_indexes

@@ -115,8 +115,12 @@ With 6-DOF admittance control and obstacle avoidance, with motion planning of tw
 3. roslaunch chonk_dynamics chonk_dynamics.launch
 4. rosrun chonk_pushing action_client_cmd_config_wholetrajectory.py
 5. rosrun chonk_pushing action_client_cmd_pose_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.py
+
+
    
 ########### Parallel Programming ###########################
+# - To launch EVA robot to pick and place a box while avoiding an obstacle using admittance control:
+![Alt text](/pics/EVApicking.png "EVApicking")
 
 With 6-DOF admittance control and obstacle avoidance, with motion planning of two end-effectors' positions and orientation, MPC tracking operational trajectory 
 1. roslaunch chonk_pushing gazebo_planner_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch 
