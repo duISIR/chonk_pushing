@@ -121,8 +121,8 @@ With 6-DOF admittance control and obstacle avoidance, with motion planning of tw
 ########### Parallel Programming ###########################
 # - To launch EVA robot to pick and place a box while avoiding an obstacle using admittance control:
 ![Alt text](/pics/EVApicking.png "EVApicking")
-
-With 6-DOF admittance control and obstacle avoidance, with motion planning of two end-effectors' positions and orientation, MPC tracking operational trajectory 
+Description:
+- With 6-DOF admittance control and obstacle avoidance, with motion planning of two end-effectors' positions and orientation, MPC tracking operational trajectory using parallel programming 
 1. roslaunch chonk_pushing gazebo_planner_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch 
 2. roslaunch chonk_pushing action_servers_planner_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
 3. roslaunch chonk_pushing action_servers_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
