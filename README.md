@@ -123,12 +123,18 @@ With 6-DOF admittance control and obstacle avoidance, with motion planning of tw
 ![Alt text](/pics/EVApicking.png "EVApicking")
 Description:
 - With 6-DOF admittance control and obstacle avoidance, with motion planning of two end-effectors' positions and orientation, MPC tracking operational trajectory using parallel programming 
-1. roslaunch chonk_pushing gazebo_planner_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch 
-2. roslaunch chonk_pushing action_servers_planner_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
-3. roslaunch chonk_pushing action_servers_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
-4. roslaunch chonk_dynamics chonk_dynamics.launch
-5. rosrun chonk_pushing action_client_cmd_config_wholetrajectory.py
-6. rosrun chonk_pushing action_client_planner_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.py 
 
+    1. Spawn EVA Gazebo model:
+    - roslaunch chonk_pushing gazebo_planner_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch 
+    2. Start motion_planning server:
+    - roslaunch chonk_pushing action_servers_planner_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
+    3. Start motion_tracking server with admittance control:
+    - roslaunch chonk_pushing action_servers_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.launch
+    4. Start EVA_dynamics node for force signal processing:
+    - roslaunch chonk_dynamics chonk_dynamics.launch
+    5. Config joints to the beginning state:
+    - rosrun robot_control action_client_cmd_config_wholetrajectory.py
+    6. Begin to grasp and place a box with admittance control:
+    - rosrun chonk_pushing action_client_planner_tracking_MPC_BC_operational_pick_localsensorAD_6DOF_bothobstacle_wholetrajectory_withOrientation_turn.py 
 
 
