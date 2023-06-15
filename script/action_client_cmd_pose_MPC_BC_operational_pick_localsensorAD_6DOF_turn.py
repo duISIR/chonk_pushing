@@ -377,7 +377,7 @@ if __name__ == '__main__':
     args['target_orientation_L'] = [ori_L[0], ori_L[1], ori_L[2], ori_L[3]]
 
     # Initialize node class
-    args['duration']=10.0
+    args['duration']=4.0
     cmd_pose_client = CmdPoseClient('client', client,
         args['m_box'],
         args['target_position_Donkey'],

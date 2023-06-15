@@ -522,8 +522,8 @@ class CmdPoseActionServer(object):
 #            quaternion_donkey_start = optas.spatialmath.Quaternion.fromrpy([np.pi/2,    0,    0]).getquat()
 #            builder_wholebodyMPC.add_cost_term('Two_arm orientation parallel with donkey plane' + str(i), 10*optas.sumsqr(self.ori_fnc_donkey(q_var_MPC[:, i]).__mul__(quaternion_donkey_start).T @ self.ori_fnc_Right(q_var_MPC[:, i]) ))
 
-            builder_wholebodyMPC.add_cost_term('Right_arm position AD' + str(i), optas.sumsqr(self.pos_fnc_Right(q_var_MPC[:, i])-pos_R_reasonal[:, i] - self.rotation_fnc_Right(init_position_MPC) @ Delta_p_Right_var_MPC[:, i]))
-            builder_wholebodyMPC.add_cost_term('Left_arm position AD' + str(i),  optas.sumsqr(self.pos_fnc_Left(q_var_MPC[:, i])-pos_L_reasonal[:, i]  - self.rotation_fnc_Left(init_position_MPC)  @ Delta_p_Left_var_MPC[:, i]))
+            builder_wholebodyMPC.add_cost_term('Right_arm position AD' + str(i), optas.sumsqr(self.pos_fnc_Right(q_var_MPC[:, i])-pos_R_reasonal[:, i] - self.rotation_fnc_Right(q_var_MPC[:, i]) @ Delta_p_Right_var_MPC[:, i]))
+            builder_wholebodyMPC.add_cost_term('Left_arm position AD' + str(i),  optas.sumsqr(self.pos_fnc_Left(q_var_MPC[:, i])-pos_L_reasonal[:, i]  - self.rotation_fnc_Left(q_var_MPC[:, i])  @ Delta_p_Left_var_MPC[:, i]))
 
 #            builder_wholebodyMPC.add_cost_term('Two_arm position forward relative to floatingbase x' + str(i), 5*optas.sumsqr(self.pos_fnc_Right_Base(q_var_MPC[:, i])[0]- self.pos_fnc_Left_Base(q_var_MPC[:, i])[0]))
 #            builder_wholebodyMPC.add_cost_term('Two_arm position forward relative to floatingbase z' + str(i), 5*optas.sumsqr(self.pos_fnc_Right_Base(q_var_MPC[:, i])[2]- self.pos_fnc_Left_Base(q_var_MPC[:, i])[2]))
